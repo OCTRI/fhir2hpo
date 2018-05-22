@@ -35,7 +35,7 @@ public class LoincId {
             return false;
         }
         LoincId other = (LoincId) o;
-        return (this.code == other.getCode());
+        return this.code.equals(other.getCode());
     }
     
     @Override

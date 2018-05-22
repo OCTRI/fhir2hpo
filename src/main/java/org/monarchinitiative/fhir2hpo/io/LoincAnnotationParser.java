@@ -38,7 +38,7 @@ public class LoincAnnotationParser {
 						String code = elements[3];
 						TermId termId = ImmutableTermId.constructWithPrefix(elements[4]);
 						boolean isNegated = Boolean.parseBoolean(elements[5]);
-
+						
 						if (!builders.containsKey(loincId)) {
 							builders.put(loincId, new Loinc2HpoAnnotation.Builder());
 							builders.get(loincId).setLoincId(loincId).setLoincScale(loincScale);
@@ -46,10 +46,8 @@ public class LoincAnnotationParser {
 
 						Term term = hpoTermMap.get(termId);
 						if (term == null) {
-							// This should not be an issue in the long run, but
-							// for now there may be disconnects in what terms
-							// are annotated versus
-							// what terms are released in the hpo.
+							// This should not be an issue in the long run, but for now there may be disconnects in what terms
+							// are annotated versus what terms are released in the hpo.
 							logger.error("The HPO Term could not be found for Term Id " + termId);
 						} else {
 							HpoTermWithNegation termWithNegation = new HpoTermWithNegation(term, isNegated);
@@ -77,6 +75,7 @@ public class LoincAnnotationParser {
 		}
 
 		Map<LoincId, Loinc2HpoAnnotation> annotationMap = new LinkedHashMap<>();
+		System.out.println(builders.keySet());
 		builders.entrySet().forEach(p -> annotationMap.put(p.getKey(), p.getValue().build()));
 		return annotationMap;
 	}
