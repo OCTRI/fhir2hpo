@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.monarchinitiative.fhir2hpo.io.LoincAnnotationParser;
-import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
+import org.monarchinitiative.fhir2hpo.loinc.DefaultLoinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser;
@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableMap;
 @Service
 public class AnnotationService {
 
-	Map<LoincId, Loinc2HpoAnnotation> loincMap;
+	Map<LoincId, DefaultLoinc2HpoAnnotation> loincMap;
 	
 	public AnnotationService() throws IOException {
 
@@ -48,7 +48,7 @@ public class AnnotationService {
         this.loincMap = LoincAnnotationParser.parse(annotations, termmap);
 	}
 	
-	public Loinc2HpoAnnotation getAnnotations(LoincId loincId) {
+	public DefaultLoinc2HpoAnnotation getAnnotations(LoincId loincId) {
 		return loincMap.get(loincId);
 	}
 

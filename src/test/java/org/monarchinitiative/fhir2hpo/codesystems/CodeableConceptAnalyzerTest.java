@@ -19,8 +19,8 @@ public class CodeableConceptAnalyzerTest {
 		List<Coding> codings = new ArrayList<>();
 		codings.add(FhirMockUtils.mockCoding("http://hl7.org/fhir/v2/0078", "LL"));
 		CodeableConcept codeableConcept = FhirMockUtils.mockCodeableConcept(codings);
-		String internalCode = CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
-		assertEquals("Expected internal code 'L' for external code 'LL'", "L", internalCode);
+		Loinc2HpoCodedValue internalCode = CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
+		assertEquals("Expected internal code 'L' for external code 'LL'", "L", internalCode.name());
 	}
 
 	@Test
@@ -29,8 +29,8 @@ public class CodeableConceptAnalyzerTest {
 		codings.add(FhirMockUtils.mockCoding("http://hl7.org/fhir/v2/0078", "LL"));
 		codings.add(FhirMockUtils.mockCoding("http://hl7.org/fhir/v2/0078", "L"));
 		CodeableConcept codeableConcept = FhirMockUtils.mockCodeableConcept(codings);
-		String internalCode = CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
-		assertEquals("Expected internal code 'L' for external codes 'LL' and 'L'", "L", internalCode);
+		Loinc2HpoCodedValue internalCode = CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
+		assertEquals("Expected internal code 'L' for external codes 'LL' and 'L'", "L", internalCode.name());
 	}
 
 	@Test(expected = UnmappedCodeableConceptException.class)

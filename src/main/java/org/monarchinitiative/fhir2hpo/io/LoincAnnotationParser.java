@@ -10,8 +10,9 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.monarchinitiative.fhir2hpo.codesystems.Loinc2HpoCodedValue;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
-import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
+import org.monarchinitiative.fhir2hpo.loinc.DefaultLoinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.LoincScale;
 import org.monarchinitiative.fhir2hpo.loinc.exception.MalformedLoincCodeException;
@@ -22,9 +23,9 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 public class LoincAnnotationParser {
 	private static final Logger logger = LogManager.getLogger();
 
-	public static Map<LoincId, Loinc2HpoAnnotation> parse(File file, Map<TermId, Term> hpoTermMap) throws FileNotFoundException {
+	public static Map<LoincId, DefaultLoinc2HpoAnnotation> parse(File file, Map<TermId, Term> hpoTermMap) throws FileNotFoundException {
 
-		Map<LoincId, Loinc2HpoAnnotation.Builder> builders = new LinkedHashMap<>();
+		Map<LoincId, DefaultLoinc2HpoAnnotation.Builder> builders = new LinkedHashMap<>();
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 		reader.lines().forEach(serialized -> {
 			String[] elements = serialized.split("\\t");
@@ -40,7 +41,7 @@ public class LoincAnnotationParser {
 						boolean isNegated = Boolean.parseBoolean(elements[5]);
 						
 						if (!builders.containsKey(loincId)) {
-							builders.put(loincId, new Loinc2HpoAnnotation.Builder());
+							builders.put(loincId, new DefaultLoinc2HpoAnnotation.Builder());
 							builders.get(loincId).setLoincId(loincId).setLoincScale(loincScale);
 						}
 
@@ -51,7 +52,11 @@ public class LoincAnnotationParser {
 							logger.error("The HPO Term could not be found for Term Id " + termId);
 						} else {
 							HpoTermWithNegation termWithNegation = new HpoTermWithNegation(term, isNegated);
-							builders.get(loincId).addMapping(code, termWithNegation);
+							try {
+								builders.get(loincId).addMapping(Loinc2HpoCodedValue.valueOf(code), termWithNegation);
+							} catch (IllegalArgumentException e) {
+								logger.error("The code " + code + " cannot be mapped in Loinc2Hpo");
+							}
 						}
 					}
 				} catch (MalformedLoincCodeException e) {
@@ -74,7 +79,7 @@ public class LoincAnnotationParser {
 			e.printStackTrace();
 		}
 
-		Map<LoincId, Loinc2HpoAnnotation> annotationMap = new LinkedHashMap<>();
+		Map<LoincId, DefaultLoinc2HpoAnnotation> annotationMap = new LinkedHashMap<>();
 		System.out.println(builders.keySet());
 		builders.entrySet().forEach(p -> annotationMap.put(p.getKey(), p.getValue().build()));
 		return annotationMap;

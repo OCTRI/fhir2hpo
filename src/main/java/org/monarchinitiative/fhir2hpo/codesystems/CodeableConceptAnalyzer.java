@@ -20,11 +20,11 @@ public class CodeableConceptAnalyzer {
 	 * @throws UnmappedCodeableConceptException 
 	 * @throws ConflictingInternalCodesException 
 	 */
-	public static String getInternalCodeForCodeableConcept(CodeableConcept codeableConcept) throws UnmappedCodeableConceptException, ConflictingInternalCodesException {
+	public static Loinc2HpoCodedValue getInternalCodeForCodeableConcept(CodeableConcept codeableConcept) throws UnmappedCodeableConceptException, ConflictingInternalCodesException {
 
 		if (codeableConcept != null) {
 			List<Coding> codings = codeableConcept.getCoding();
-			Set<String> distinctCodes = codings.stream().map(coding -> CodeContainer.getInternalCode(coding)).
+			Set<Loinc2HpoCodedValue> distinctCodes = codings.stream().map(coding -> CodeContainer.getInternalCode(coding)).
 				filter(coding -> coding != null).collect(Collectors.toSet());
 			if (distinctCodes.size() == 0) {
 				throw new UnmappedCodeableConceptException();
