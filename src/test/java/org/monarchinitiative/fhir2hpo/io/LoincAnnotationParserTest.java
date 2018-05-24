@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.monarchinitiative.fhir2hpo.loinc.DefaultLoinc2HpoAnnotation;
+import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.exception.MalformedLoincCodeException;
 import org.monarchinitiative.fhir2hpo.util.HpoMockUtils;
@@ -20,7 +20,7 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 
 public class LoincAnnotationParserTest {
 
-	private Map<LoincId, DefaultLoinc2HpoAnnotation> annotations;
+	private Map<LoincId, Loinc2HpoAnnotation> annotations;
 
 	@Before
 	public void setup() throws FileNotFoundException {
@@ -41,7 +41,7 @@ public class LoincAnnotationParserTest {
 	public void testAnnotationsParsed() throws MalformedLoincCodeException {
 
 		LoincId loincId = new LoincId("777-3");
-		DefaultLoinc2HpoAnnotation annotation = annotations.get(loincId);
+		Loinc2HpoAnnotation annotation = annotations.get(loincId);
 		assertNotNull("Annotation exists for LOINC 777-3", annotation);
 		
 		loincId = new LoincId("15074-8");

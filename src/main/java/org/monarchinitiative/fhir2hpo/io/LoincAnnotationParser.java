@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.monarchinitiative.fhir2hpo.codesystems.Loinc2HpoCodedValue;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 import org.monarchinitiative.fhir2hpo.loinc.DefaultLoinc2HpoAnnotation;
+import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.LoincScale;
 import org.monarchinitiative.fhir2hpo.loinc.exception.MalformedLoincCodeException;
@@ -31,7 +32,7 @@ public class LoincAnnotationParser {
 	private static final int COL_IS_FINALIZED = 11;
 	private static final int NUM_COL = 13;
 
-	public static Map<LoincId, DefaultLoinc2HpoAnnotation> parse(File file, Map<TermId, Term> hpoTermMap) throws FileNotFoundException {
+	public static Map<LoincId, Loinc2HpoAnnotation> parse(File file, Map<TermId, Term> hpoTermMap) throws FileNotFoundException {
 
 		Map<LoincId, DefaultLoinc2HpoAnnotation.Builder> builders = new LinkedHashMap<>();
 		BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -89,7 +90,7 @@ public class LoincAnnotationParser {
 			e.printStackTrace();
 		}
 
-		Map<LoincId, DefaultLoinc2HpoAnnotation> annotationMap = new LinkedHashMap<>();
+		Map<LoincId, Loinc2HpoAnnotation> annotationMap = new LinkedHashMap<>();
 		builders.entrySet().forEach(p -> annotationMap.put(p.getKey(), p.getValue().build()));
 		return annotationMap;
 	}
