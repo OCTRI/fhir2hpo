@@ -2,6 +2,8 @@ package org.monarchinitiative.fhir2hpo.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,8 +32,17 @@ public class AnnotationService {
 	
 	public AnnotationService() throws IOException {
 
+		// TODO: Find a better option for these resources. They have to be retrieved as a stream once they are packaged
+		// into a jar, but the HpoOboParser requires a file
 		ClassLoader classLoader = getClass().getClassLoader();
-		File hpo = new File(classLoader.getResource("hp.obo").getFile());
+		InputStream stream = classLoader.getResourceAsStream("hp.obo");
+		File hpo = new File("hp.tmp");
+		java.nio.file.Files.copy(stream,
+				hpo.toPath(), 
+				StandardCopyOption.REPLACE_EXISTING);
+		stream.close();
+				
+		//File hpo = new File(classLoader.getResource("hp.obo").getFile());
 		HpoOboParser hpoOboParser = new HpoOboParser(hpo);
 		HpoOntology ontology = hpoOboParser.parse();
 		
@@ -44,8 +55,7 @@ public class AnnotationService {
         res.forEach( term -> termmapBuilder.put(term.getId(), term));
         ImmutableMap<TermId, Term> termmap = termmapBuilder.build();
 
-		File annotations = new File(classLoader.getResource("annotations.tsv").getFile());
-        this.loincMap = LoincAnnotationParser.parse(annotations, termmap);
+       this.loincMap = LoincAnnotationParser.parse(classLoader.getResourceAsStream("annotations.tsv"), termmap);
 	}
 	
 	public Map<LoincId, Loinc2HpoAnnotation> getAnnotationsMap() {
