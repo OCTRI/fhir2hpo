@@ -1,6 +1,7 @@
 package org.monarchinitiative.fhir2hpo.io;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,6 +33,7 @@ public class LoincAnnotationParserTest {
 		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0001943"), HpoMockUtils.mockTerm("Hypoglycemia"));
 		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0011015"), HpoMockUtils.mockTerm("Abnormality of blood glucose concentration"));
 		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0003074"), HpoMockUtils.mockTerm("Hyperglycemia"));
+		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0003541"), HpoMockUtils.mockTerm("Urinary glycosaminoglycan excretion"));
 		annotations = LoincAnnotationParser.parse(annotationFile, hpoTermMap);
 	}
 	
@@ -45,7 +47,11 @@ public class LoincAnnotationParserTest {
 		loincId = new LoincId("15074-8");
 		annotation = annotations.get(loincId);
 		assertNotNull("Annotation exists for LOINC 15074-8", annotation);
-		
+
+		loincId = new LoincId("2398-6");
+		annotation = annotations.get(loincId);
+		assertNotNull("Annotation exists for LOINC 2398-6", annotation);
+
 		loincId = new LoincId("0-0");
 		annotation = annotations.get(loincId);
 		assertNull("No Annotation exists for LOINC 0-0", annotation);

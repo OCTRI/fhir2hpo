@@ -23,22 +23,30 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 public class LoincAnnotationParser {
 	private static final Logger logger = LogManager.getLogger();
 
+	private static final int COL_LOINC_ID = 0;
+	private static final int COL_LOINC_SCALE = 1;
+	private static final int COL_CODE = 3;
+	private static final int COL_HPO_TERM = 4;
+	private static final int COL_IS_NEGATED = 5;
+	private static final int COL_IS_FINALIZED = 11;
+	private static final int NUM_COL = 13;
+
 	public static Map<LoincId, DefaultLoinc2HpoAnnotation> parse(File file, Map<TermId, Term> hpoTermMap) throws FileNotFoundException {
 
 		Map<LoincId, DefaultLoinc2HpoAnnotation.Builder> builders = new LinkedHashMap<>();
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 		reader.lines().forEach(serialized -> {
 			String[] elements = serialized.split("\\t");
-			if (elements.length == 13 && !serialized.startsWith("loincId")) {
+			if (elements.length == NUM_COL && !serialized.startsWith("loincId")) {
 				try {
 					// Only process if finalized
-					boolean finalized = Boolean.parseBoolean(elements[11]);
+					boolean finalized = Boolean.parseBoolean(elements[COL_IS_FINALIZED]);
 					if (finalized) {
-						LoincId loincId = new LoincId(elements[0]);
-						LoincScale loincScale = LoincScale.string2enum(elements[1]);
-						String code = elements[3];
-						TermId termId = ImmutableTermId.constructWithPrefix(elements[4]);
-						boolean isNegated = Boolean.parseBoolean(elements[5]);
+						LoincId loincId = new LoincId(elements[COL_LOINC_ID]);
+						LoincScale loincScale = LoincScale.string2enum(elements[COL_LOINC_SCALE]);
+						String code = elements[COL_CODE];
+						TermId termId = ImmutableTermId.constructWithPrefix(elements[COL_HPO_TERM]);
+						boolean isNegated = Boolean.parseBoolean(elements[COL_IS_NEGATED]);
 						
 						if (!builders.containsKey(loincId)) {
 							builders.put(loincId, new DefaultLoinc2HpoAnnotation.Builder());
@@ -53,7 +61,8 @@ public class LoincAnnotationParser {
 						} else {
 							HpoTermWithNegation termWithNegation = new HpoTermWithNegation(term, isNegated);
 							try {
-								builders.get(loincId).addMapping(Loinc2HpoCodedValue.valueOf(code), termWithNegation);
+								builders.get(loincId).addMapping(Loinc2HpoCodedValue.getCodedValue(code),
+										termWithNegation);
 							} catch (IllegalArgumentException e) {
 								logger.error("The code " + code + " cannot be mapped in Loinc2Hpo");
 							}
@@ -63,8 +72,9 @@ public class LoincAnnotationParser {
 					logger.error("Malformed loinc code line: " + serialized);
 				}
 			} else {
-				if (elements.length != 13) {
-					logger.error(String.format("line does not have 13 elements, but has %d elements. Line: %s",
+				if (elements.length != NUM_COL) {
+					logger.error(
+							String.format("line does not have " + NUM_COL + " elements, but has %d elements. Line: %s",
 							elements.length, serialized));
 				} else {
 					logger.debug("line is header: " + serialized);
@@ -80,7 +90,6 @@ public class LoincAnnotationParser {
 		}
 
 		Map<LoincId, DefaultLoinc2HpoAnnotation> annotationMap = new LinkedHashMap<>();
-		System.out.println(builders.keySet());
 		builders.entrySet().forEach(p -> annotationMap.put(p.getKey(), p.getValue().build()));
 		return annotationMap;
 	}
