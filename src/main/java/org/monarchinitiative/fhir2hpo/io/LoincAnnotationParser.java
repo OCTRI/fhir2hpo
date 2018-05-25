@@ -1,10 +1,10 @@
 package org.monarchinitiative.fhir2hpo.io;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -32,10 +32,10 @@ public class LoincAnnotationParser {
 	private static final int COL_IS_FINALIZED = 11;
 	private static final int NUM_COL = 13;
 
-	public static Map<LoincId, Loinc2HpoAnnotation> parse(File file, Map<TermId, Term> hpoTermMap) throws FileNotFoundException {
+	public static Map<LoincId, Loinc2HpoAnnotation> parse(InputStream stream, Map<TermId, Term> hpoTermMap) throws FileNotFoundException {
 
 		Map<LoincId, DefaultLoinc2HpoAnnotation.Builder> builders = new LinkedHashMap<>();
-		BufferedReader reader = new BufferedReader(new FileReader(file));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 		reader.lines().forEach(serialized -> {
 			String[] elements = serialized.split("\\t");
 			if (elements.length == NUM_COL && !serialized.startsWith("loincId")) {

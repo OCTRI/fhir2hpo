@@ -3,8 +3,8 @@ package org.monarchinitiative.fhir2hpo.io;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -24,7 +24,7 @@ public class LoincAnnotationParserTest {
 
 	@Before
 	public void setup() throws FileNotFoundException {
-		File annotationFile = new File(getClass().getClassLoader().getResource("annotations.tsv").getFile());
+		InputStream annotationsResource = getClass().getClassLoader().getResourceAsStream("annotations.tsv");
 		
 		Map<TermId, Term> hpoTermMap = new LinkedHashMap<>();
 		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0001873"), HpoMockUtils.mockTerm("Thrombocytopenia"));
@@ -34,7 +34,7 @@ public class LoincAnnotationParserTest {
 		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0011015"), HpoMockUtils.mockTerm("Abnormality of blood glucose concentration"));
 		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0003074"), HpoMockUtils.mockTerm("Hyperglycemia"));
 		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0003541"), HpoMockUtils.mockTerm("Urinary glycosaminoglycan excretion"));
-		annotations = LoincAnnotationParser.parse(annotationFile, hpoTermMap);
+		annotations = LoincAnnotationParser.parse(annotationsResource, hpoTermMap);
 	}
 	
 	@Test
