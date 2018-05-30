@@ -7,6 +7,8 @@ import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException.LoincExceptionType;
 
 public class ObservationUtil {
+	
+	private static final String LOINC_SYSTEM = "http://loinc.org";
 
 	/**
 	 * A method to get the LoincId from a FHIR observation
@@ -17,7 +19,7 @@ public class ObservationUtil {
 	public static LoincId getLoincIdOfObservation(Observation observation) throws LoincException {
 		LoincId loincId = null;
 		for (Coding coding : observation.getCode().getCoding()) {
-			if (coding.getSystem().equals("http://loinc.org")) {
+			if (coding.getSystem().equals(LOINC_SYSTEM)) {
 				if (loincId != null && !loincId.getCode().equals(coding.getCode())) {
 					throw new LoincException(LoincExceptionType.CONFLICTING_LOINC_CODES);
 				} else {
