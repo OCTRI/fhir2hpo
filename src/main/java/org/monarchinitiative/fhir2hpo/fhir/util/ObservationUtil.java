@@ -7,13 +7,13 @@ import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException.LoincExceptionType;
 
 public class ObservationUtil {
-	
+
 	private static final String LOINC_SYSTEM = "http://loinc.org";
 
 	/**
-	 * A method to get the LoincId from a FHIR observation
+	 * A method to get the LoincId from a FHIR observation.
 	 * 
-	 * @return
+	 * @return the single LoincId in the observation 
 	 * @throws LoincException
 	 */
 	public static LoincId getLoincIdOfObservation(Observation observation) throws LoincException {
@@ -27,8 +27,9 @@ public class ObservationUtil {
 				}
 			}
 		}
-		if (loincId == null)
+		if (loincId == null) {
 			throw new LoincException(LoincExceptionType.LOINC_CODE_NOT_FOUND);
+		}
 		return loincId;
 	}
 

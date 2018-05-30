@@ -65,8 +65,7 @@ public class LoincAnnotationParser {
 						Term term = hpoTermMap.get(termId);
 						if (term == null) {
 							// This should not be an issue in the long run, but for now there may be disconnects in what
-							// terms
-							// are annotated versus what terms are released in the hpo.
+							// terms are annotated versus what terms are released in the hpo.
 							logger.error("The HPO Term could not be found for Term Id " + termId);
 						} else {
 							HpoTermWithNegation termWithNegation = new HpoTermWithNegation(term, isNegated);
