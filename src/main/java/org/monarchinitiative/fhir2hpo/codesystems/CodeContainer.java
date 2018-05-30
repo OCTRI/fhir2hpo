@@ -11,50 +11,50 @@ import org.hl7.fhir.dstu3.model.Coding;
 //TODO: Consider allowing jar user to add their own mappings as original library did
 public class CodeContainer {
 	
-	private static Map<String,String> fhirv2interpretations = Collections.unmodifiableMap(Stream.of(
-			new SimpleEntry<>("<", "L"),
-			new SimpleEntry<>(">", "H"),
-			new SimpleEntry<>("A", "A"),
-			new SimpleEntry<>("AA", "A"),
-			new SimpleEntry<>("AC", "POS"),
-			new SimpleEntry<>("B", "N"),
-			new SimpleEntry<>("D", "L"),
-			new SimpleEntry<>("DET", "POS"),
-			new SimpleEntry<>("H", "H"),
-			new SimpleEntry<>("HH", "H"),
-			new SimpleEntry<>("HM", "U"),
-			new SimpleEntry<>("HU", "H"),
-			new SimpleEntry<>("I", "N"),
-			new SimpleEntry<>("IE", "U"),
-			new SimpleEntry<>("IND", "U"),
-			new SimpleEntry<>("L", "L"),
-			new SimpleEntry<>("LL", "L"),
-			new SimpleEntry<>("LU", "L"),
-			new SimpleEntry<>("MS", "U"),
-			new SimpleEntry<>("N", "N"),
-			new SimpleEntry<>("ND", "NEG"),
-			new SimpleEntry<>("NEG", "NEG"),
-			new SimpleEntry<>("NR", "NEG"),
-			new SimpleEntry<>("NS", "U"),
-			new SimpleEntry<>("null", "U"),
-			new SimpleEntry<>("OBX", "U"),
-			new SimpleEntry<>("POS", "POS"),
-			new SimpleEntry<>("QCF", "U"),
-			new SimpleEntry<>("R", "U"),
-			new SimpleEntry<>("RR", "POS"),
-			new SimpleEntry<>("S", "U"),
-			new SimpleEntry<>("SDD", "U"),
-			new SimpleEntry<>("SYN-R", "U"),
-			new SimpleEntry<>("SYN-S", "U"),
-			new SimpleEntry<>("TOX", "POS"),
-			new SimpleEntry<>("U", "H"),
-			new SimpleEntry<>("VS", "U"),
-			new SimpleEntry<>("W", "A"),
-			new SimpleEntry<>("WR", "POS"))
+	private static Map<String,Loinc2HpoCodedValue> fhirv2interpretations = Collections.unmodifiableMap(Stream.of(
+			new SimpleEntry<>("<", Loinc2HpoCodedValue.L),
+			new SimpleEntry<>(">", Loinc2HpoCodedValue.H),
+			new SimpleEntry<>("A", Loinc2HpoCodedValue.A),
+			new SimpleEntry<>("AA", Loinc2HpoCodedValue.A),
+			new SimpleEntry<>("AC", Loinc2HpoCodedValue.H),
+			new SimpleEntry<>("B", Loinc2HpoCodedValue.N),
+			new SimpleEntry<>("D", Loinc2HpoCodedValue.L),
+			new SimpleEntry<>("DET", Loinc2HpoCodedValue.H),
+			new SimpleEntry<>("H", Loinc2HpoCodedValue.H),
+			new SimpleEntry<>("HH", Loinc2HpoCodedValue.H),
+			new SimpleEntry<>("HM", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("HU", Loinc2HpoCodedValue.H),
+			new SimpleEntry<>("I", Loinc2HpoCodedValue.N),
+			new SimpleEntry<>("IE", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("IND", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("L", Loinc2HpoCodedValue.L),
+			new SimpleEntry<>("LL", Loinc2HpoCodedValue.L),
+			new SimpleEntry<>("LU", Loinc2HpoCodedValue.L),
+			new SimpleEntry<>("MS", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("N", Loinc2HpoCodedValue.N),
+			new SimpleEntry<>("ND", Loinc2HpoCodedValue.N),
+			new SimpleEntry<>("NEG", Loinc2HpoCodedValue.N),
+			new SimpleEntry<>("NR", Loinc2HpoCodedValue.N),
+			new SimpleEntry<>("NS", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("null", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("OBX", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("POS", Loinc2HpoCodedValue.H),
+			new SimpleEntry<>("QCF", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("R", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("RR", Loinc2HpoCodedValue.H),
+			new SimpleEntry<>("S", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("SDD", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("SYN-R", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("SYN-S", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("TOX", Loinc2HpoCodedValue.H),
+			new SimpleEntry<>("U", Loinc2HpoCodedValue.H),
+			new SimpleEntry<>("VS", Loinc2HpoCodedValue.U),
+			new SimpleEntry<>("W", Loinc2HpoCodedValue.A),
+			new SimpleEntry<>("WR", Loinc2HpoCodedValue.H))
             .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue())));
 
     // Map from the code system (e.g., http://hl7.org/fhir/v2/0078) to the external code for that system to the corresponding internal code
-    private static Map<String, Map<String, String>> codelists = Collections.unmodifiableMap(Stream.of(            
+    private static Map<String, Map<String, Loinc2HpoCodedValue>> codelists = Collections.unmodifiableMap(Stream.of(            
     		new SimpleEntry<>("http://hl7.org/fhir/v2/0078", fhirv2interpretations))
             .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue())));
     
@@ -63,8 +63,8 @@ public class CodeContainer {
      * @param coding the external coding
      * @return the internal code or null if either the system or code is not found
      */
-    public static String getInternalCode(Coding coding) {
-    	Map<String, String> systemMap = codelists.get(coding.getSystem());
+    public static Loinc2HpoCodedValue getInternalCode(Coding coding) {
+    	Map<String, Loinc2HpoCodedValue> systemMap = codelists.get(coding.getSystem());
     	
     	if (systemMap != null) {
     		return systemMap.get(coding.getCode());

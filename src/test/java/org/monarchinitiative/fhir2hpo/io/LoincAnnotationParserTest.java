@@ -1,9 +1,10 @@
 package org.monarchinitiative.fhir2hpo.io;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public class LoincAnnotationParserTest {
 
 	@Before
 	public void setup() throws FileNotFoundException {
-		File annotationFile = new File(getClass().getClassLoader().getResource("annotations.tsv").getFile());
+		InputStream annotationsResource = getClass().getClassLoader().getResourceAsStream("annotations.tsv");
 		
 		Map<TermId, Term> hpoTermMap = new LinkedHashMap<>();
 		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0001873"), HpoMockUtils.mockTerm("Thrombocytopenia"));
@@ -32,7 +33,8 @@ public class LoincAnnotationParserTest {
 		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0001943"), HpoMockUtils.mockTerm("Hypoglycemia"));
 		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0011015"), HpoMockUtils.mockTerm("Abnormality of blood glucose concentration"));
 		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0003074"), HpoMockUtils.mockTerm("Hyperglycemia"));
-		annotations = LoincAnnotationParser.parse(annotationFile, hpoTermMap);
+		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0003541"), HpoMockUtils.mockTerm("Urinary glycosaminoglycan excretion"));
+		annotations = LoincAnnotationParser.parse(annotationsResource, hpoTermMap);
 	}
 	
 	@Test
@@ -45,7 +47,11 @@ public class LoincAnnotationParserTest {
 		loincId = new LoincId("15074-8");
 		annotation = annotations.get(loincId);
 		assertNotNull("Annotation exists for LOINC 15074-8", annotation);
-		
+
+		loincId = new LoincId("2398-6");
+		annotation = annotations.get(loincId);
+		assertNotNull("Annotation exists for LOINC 2398-6", annotation);
+
 		loincId = new LoincId("0-0");
 		annotation = annotations.get(loincId);
 		assertNull("No Annotation exists for LOINC 0-0", annotation);
