@@ -15,7 +15,7 @@ import org.monarchinitiative.fhir2hpo.config.FhirConfiguration;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException.ConversionExceptionType;
-import org.monarchinitiative.fhir2hpo.loinc.exception.MalformedLoincCodeException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 import org.monarchinitiative.fhir2hpo.util.HpoMockUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,7 +35,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	private DefaultLoinc2HpoAnnotation annotation;
 
 	@Before
-	public void setup() throws MalformedLoincCodeException {
+	public void setup() throws LoincException {
 
 		LoincId loincId = new LoincId("15074-8");
 		annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
@@ -46,16 +46,35 @@ public class DefaultLoinc2HpoAnnotationTest {
 				.build();
 
 	}
+	
+	@Test
+	public void testMismatchedLoincId() throws LoincException, FHIRException {
+		// Tie the annotation to the code "0-0"
+		LoincId loincId = new LoincId("0-0");
+		annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
+				.addMapping(Loinc2HpoCodedValue.L, HpoMockUtils.mockHpoTermWithNegation("Hypoglycemia", false))
+				.addMapping(Loinc2HpoCodedValue.N,
+						HpoMockUtils.mockHpoTermWithNegation("Abnormality of blood glucose concentration", true))
+				.addMapping(Loinc2HpoCodedValue.H, HpoMockUtils.mockHpoTermWithNegation("Hyperglycemia", false))
+				.build();
+		
+		// Try to convert observation with the code 15074-8
+		try {
+			annotation.convert(getObservation("fhir/glucoseHighInterpretation.json"));
+		} catch (ConversionException e) {
+			assertEquals("Should not be able to convert with mismatched LoincId", ConversionExceptionType.MISMATCHED_LOINC_ID, e.getType());
+		} 
+	}
 
 	@Test
-	public void testObservationWithInterpretation() throws ConversionException, FHIRException {
+	public void testObservationWithInterpretation() throws LoincException, ConversionException, FHIRException {
 
 		HpoTermWithNegation term = annotation.convert(getObservation("fhir/glucoseHighInterpretation.json"));
 		assertEquals("Expected code 'H' to be mapped to Hyperglycemia.", "Hyperglycemia", term.getHpoTerm().getName());
 		assertEquals("Expected Hyperglycemia not to be negated.", false, term.isNegated());
 	}
 
-	public void testUnmappedInterpretationCode() throws MalformedLoincCodeException, FHIRException {
+	public void testUnmappedInterpretationCode() throws LoincException, FHIRException {
 
 		// The annotations do not provide a "High" mapping
 		LoincId loincId = new LoincId("15074-8");
@@ -72,7 +91,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	}
 
 	@Test
-	public void testObservationWithValueQuantity() throws ConversionException, FHIRException {
+	public void testObservationWithValueQuantity() throws LoincException, ConversionException, FHIRException {
 
 		HpoTermWithNegation term = annotation.convert(getObservation("fhir/glucoseHighValueQuantity.json"));
 		assertEquals("Expected code 'H' to be mapped to Hyperglycemia.", "Hyperglycemia", term.getHpoTerm().getName());

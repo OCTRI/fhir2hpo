@@ -8,7 +8,7 @@ import org.monarchinitiative.fhir2hpo.codesystems.Loinc2HpoCodedValue;
 import org.monarchinitiative.fhir2hpo.loinc.DefaultLoinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.LoincScale;
-import org.monarchinitiative.fhir2hpo.loinc.exception.MalformedLoincCodeException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 import org.monarchinitiative.fhir2hpo.util.HpoMockUtils;
 
 /**
@@ -22,7 +22,7 @@ public class AnnotationServiceTest {
 	AnnotationService annotationService;
 	
 	@Before
-	public void setup() throws MalformedLoincCodeException {
+	public void setup() throws LoincException {
 		
 		LoincId loincId = new LoincId("15074-8");
 		DefaultLoinc2HpoAnnotation annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)

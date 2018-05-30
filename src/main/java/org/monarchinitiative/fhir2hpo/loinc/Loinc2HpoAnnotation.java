@@ -4,6 +4,7 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 
 /**
  * This interface defines the complete HPO annotation for a given LOINC Id. It provides a way to convert
@@ -30,13 +31,10 @@ public interface Loinc2HpoAnnotation {
      * 
      * @param observation
      * @return
-     * @throws UnmappedCodeableConceptException
-     * @throws ConflictingInternalCodesException
-     * @throws UnmappedInternalCodeException
-     * @throws ReferenceRangeNotFoundException
-     * @throws AmbiguousReferenceRangeException
+     * @throws LoincException
+     * @throws ConversionException
      * @throws FHIRException
      */
-    public HpoTermWithNegation convert(Observation observation) throws ConversionException, FHIRException;
+    public HpoTermWithNegation convert(Observation observation) throws LoincException, ConversionException, FHIRException;
 
 }

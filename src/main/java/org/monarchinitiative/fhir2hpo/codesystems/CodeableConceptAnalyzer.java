@@ -17,8 +17,7 @@ public class CodeableConceptAnalyzer {
 	 * 
 	 * @param codeableConcept
 	 * @return the single internal code for the concept
-	 * @throws UnmappedCodeableConceptException
-	 * @throws ConflictingInternalCodesException
+	 * @throws ConversionException
 	 */
 	public static Loinc2HpoCodedValue getInternalCodeForCodeableConcept(CodeableConcept codeableConcept)
 			throws ConversionException {

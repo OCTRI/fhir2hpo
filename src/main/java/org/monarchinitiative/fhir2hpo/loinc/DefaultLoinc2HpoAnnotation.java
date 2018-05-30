@@ -10,9 +10,11 @@ import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.monarchinitiative.fhir2hpo.codesystems.CodeableConceptAnalyzer;
 import org.monarchinitiative.fhir2hpo.codesystems.Loinc2HpoCodedValue;
+import org.monarchinitiative.fhir2hpo.fhir.util.ObservationUtil;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException.ConversionExceptionType;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 
 /**
  * This represents the default annotation implementation where a single observation is parsed
@@ -106,13 +108,15 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		return loincScale;
 	}
 
-	// TODO: This takes for granted that the observation passed in actually has the loincid associated with this
-	// instance.
-	// Seems like we should either assert this or reconsider design.
 	@Override
 	public HpoTermWithNegation convert(Observation observation)
-			throws ConversionException, FHIRException {
+			throws LoincException, ConversionException, FHIRException {
 
+		LoincId observationLoincId = ObservationUtil.getLoincIdOfObservation(observation);
+		if (!observationLoincId.equals(loincId)) {
+			throw new ConversionException(ConversionExceptionType.MISMATCHED_LOINC_ID, "Can only convert observations with LoincId " + loincId);
+		}
+		
 		if (observation.hasInterpretation()) {
 			Loinc2HpoCodedValue internalCode = CodeableConceptAnalyzer
 					.getInternalCodeForCodeableConcept(observation.getInterpretation());
@@ -131,7 +135,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	 * 
 	 * @param code
 	 * @return the term with negation
-	 * @throws UnmappedInternalCodeException
+	 * @throws ConversionException
 	 */
 	private HpoTermWithNegation getHpoTermForInternalCode(Loinc2HpoCodedValue code)
 			throws ConversionException {
