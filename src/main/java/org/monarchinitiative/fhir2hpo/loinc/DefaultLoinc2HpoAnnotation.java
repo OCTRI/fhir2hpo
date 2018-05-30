@@ -11,11 +11,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.monarchinitiative.fhir2hpo.codesystems.CodeableConceptAnalyzer;
 import org.monarchinitiative.fhir2hpo.codesystems.Loinc2HpoCodedValue;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
-import org.monarchinitiative.fhir2hpo.loinc.exception.AmbiguousReferenceRangeException;
-import org.monarchinitiative.fhir2hpo.loinc.exception.ConflictingInternalCodesException;
-import org.monarchinitiative.fhir2hpo.loinc.exception.ReferenceRangeNotFoundException;
-import org.monarchinitiative.fhir2hpo.loinc.exception.UnmappedCodeableConceptException;
-import org.monarchinitiative.fhir2hpo.loinc.exception.UnmappedInternalCodeException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException.ConversionExceptionType;
 
 /**
  * This represents the default annotation implementation where a single observation is parsed
@@ -114,8 +111,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	// Seems like we should either assert this or reconsider design.
 	@Override
 	public HpoTermWithNegation convert(Observation observation)
-			throws UnmappedCodeableConceptException, ConflictingInternalCodesException, UnmappedInternalCodeException,
-			ReferenceRangeNotFoundException, AmbiguousReferenceRangeException, FHIRException {
+			throws ConversionException, FHIRException {
 
 		if (observation.hasInterpretation()) {
 			Loinc2HpoCodedValue internalCode = CodeableConceptAnalyzer
@@ -138,26 +134,26 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	 * @throws UnmappedInternalCodeException
 	 */
 	private HpoTermWithNegation getHpoTermForInternalCode(Loinc2HpoCodedValue code)
-			throws UnmappedInternalCodeException {
+			throws ConversionException {
 		HpoTermWithNegation term = codeToHpoTerm.get(code);
 		if (term == null) {
-			throw new UnmappedInternalCodeException(loincId, code.name());
+			throw new ConversionException(ConversionExceptionType.UNMAPPED_INTERNAL_CODE, "The internal code " + code.name() + " has no HPO mapping for LOINC " + loincId.getCode());
 		}
 		return term;
 	}
 
 	private HpoTermWithNegation getHpoTermForValueQuantity(Quantity valueQuantity,
 			List<ObservationReferenceRangeComponent> referenceRange)
-			throws UnmappedInternalCodeException, ReferenceRangeNotFoundException, AmbiguousReferenceRangeException {
+			throws ConversionException {
 		if (referenceRange.size() < 1) {
-			throw new ReferenceRangeNotFoundException();
+			throw new ConversionException(ConversionExceptionType.REFERENCE_RANGE_NOT_FOUND);
 		} else if (referenceRange.size() > 1) {
 			// TODO: It can happen when there is actually one range but coded in three ranges
 			// e.g. normal 20-30
 			// in this case, one range ([20, 30]) is sufficient;
 			// however, it is written as three ranges: ( , 20) [20, 30] (30, )
 			// We should handle this case
-			throw new AmbiguousReferenceRangeException();
+			throw new ConversionException(ConversionExceptionType.AMBIGUOUS_REFERENCE_RANGE);
 		}
 
 		ObservationReferenceRangeComponent targetReference = referenceRange.get(0);
