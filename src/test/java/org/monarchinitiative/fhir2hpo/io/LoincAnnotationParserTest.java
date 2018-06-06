@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
-import org.monarchinitiative.fhir2hpo.loinc.exception.MalformedLoincCodeException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 import org.monarchinitiative.fhir2hpo.util.HpoMockUtils;
 import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -38,7 +38,7 @@ public class LoincAnnotationParserTest {
 	}
 	
 	@Test
-	public void testAnnotationsParsed() throws MalformedLoincCodeException {
+	public void testAnnotationsParsed() throws LoincException {
 
 		LoincId loincId = new LoincId("777-3");
 		Loinc2HpoAnnotation annotation = annotations.get(loincId);

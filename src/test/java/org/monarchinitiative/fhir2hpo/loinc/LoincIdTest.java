@@ -3,12 +3,13 @@ package org.monarchinitiative.fhir2hpo.loinc;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.monarchinitiative.fhir2hpo.loinc.exception.MalformedLoincCodeException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException.LoincExceptionType;
 
 public class LoincIdTest {
 	
     @Test
-    public void testConstructor() throws MalformedLoincCodeException {
+    public void testConstructor() throws LoincException {
         String code = "15074-8";
         LoincId id = new LoincId(code);
         assertEquals(code,id.getCode());
@@ -18,22 +19,28 @@ public class LoincIdTest {
         assertEquals(code,id.getCode());
     }
 
-    @Test(expected = MalformedLoincCodeException.class)
-    public void testMalformedCode() throws MalformedLoincCodeException {
+    public void testMalformedCode() {
         String code = "15074-";
-        LoincId id = new LoincId(code);
-        assertEquals(code,id.getCode());
+        
+		try {
+			new LoincId(code);
+		} catch (LoincException e) {
+	        assertEquals("Expected malformed loinc exception", LoincExceptionType.MALFORMED_LOINC_CODE, e.getType());
+		}
     }
 
-    @Test(expected = MalformedLoincCodeException.class)
-    public void testMalformedCode2() throws MalformedLoincCodeException {
+    public void testMalformedCode2() {
         String code = "1507423";
-        LoincId id = new LoincId(code);
-        assertEquals(code,id.getCode());
+        
+		try {
+			new LoincId(code);
+		} catch (LoincException e) {
+	        assertEquals("Expected malformed loinc exception", LoincExceptionType.MALFORMED_LOINC_CODE, e.getType());
+		}
     }
 
     @Test
-    public void testEquals() throws MalformedLoincCodeException {
+    public void testEquals() throws LoincException {
         String code1="19048-8";
         String code2="19048-8";
         LoincId id1=new LoincId(code1);

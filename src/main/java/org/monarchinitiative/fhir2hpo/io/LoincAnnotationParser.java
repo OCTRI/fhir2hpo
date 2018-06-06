@@ -16,12 +16,19 @@ import org.monarchinitiative.fhir2hpo.loinc.DefaultLoinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.LoincScale;
-import org.monarchinitiative.fhir2hpo.loinc.exception.MalformedLoincCodeException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
+/**
+ * Parse the standard tab-delimited annotations file and construct the annotation map.
+ * 
+ * @author yateam
+ *
+ */
 public class LoincAnnotationParser {
+
 	private static final Logger logger = LogManager.getLogger();
 
 	private static final int COL_LOINC_ID = 0;
@@ -32,7 +39,8 @@ public class LoincAnnotationParser {
 	private static final int COL_IS_FINALIZED = 11;
 	private static final int NUM_COL = 13;
 
-	public static Map<LoincId, Loinc2HpoAnnotation> parse(InputStream stream, Map<TermId, Term> hpoTermMap) throws FileNotFoundException {
+	public static Map<LoincId, Loinc2HpoAnnotation> parse(InputStream stream, Map<TermId, Term> hpoTermMap)
+			throws FileNotFoundException {
 
 		Map<LoincId, DefaultLoinc2HpoAnnotation.Builder> builders = new LinkedHashMap<>();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
@@ -48,7 +56,7 @@ public class LoincAnnotationParser {
 						String code = elements[COL_CODE];
 						TermId termId = ImmutableTermId.constructWithPrefix(elements[COL_HPO_TERM]);
 						boolean isNegated = Boolean.parseBoolean(elements[COL_IS_NEGATED]);
-						
+
 						if (!builders.containsKey(loincId)) {
 							builders.put(loincId, new DefaultLoinc2HpoAnnotation.Builder());
 							builders.get(loincId).setLoincId(loincId).setLoincScale(loincScale);
@@ -56,8 +64,8 @@ public class LoincAnnotationParser {
 
 						Term term = hpoTermMap.get(termId);
 						if (term == null) {
-							// This should not be an issue in the long run, but for now there may be disconnects in what terms
-							// are annotated versus what terms are released in the hpo.
+							// This should not be an issue in the long run, but for now there may be disconnects in what
+							// terms are annotated versus what terms are released in the hpo.
 							logger.error("The HPO Term could not be found for Term Id " + termId);
 						} else {
 							HpoTermWithNegation termWithNegation = new HpoTermWithNegation(term, isNegated);
@@ -69,14 +77,14 @@ public class LoincAnnotationParser {
 							}
 						}
 					}
-				} catch (MalformedLoincCodeException e) {
+				} catch (LoincException e) {
 					logger.error("Malformed loinc code line: " + serialized);
 				}
 			} else {
 				if (elements.length != NUM_COL) {
 					logger.error(
 							String.format("line does not have " + NUM_COL + " elements, but has %d elements. Line: %s",
-							elements.length, serialized));
+									elements.length, serialized));
 				} else {
 					logger.debug("line is header: " + serialized);
 				}
@@ -94,6 +102,5 @@ public class LoincAnnotationParser {
 		builders.entrySet().forEach(p -> annotationMap.put(p.getKey(), p.getValue().build()));
 		return annotationMap;
 	}
-	
 
 }
