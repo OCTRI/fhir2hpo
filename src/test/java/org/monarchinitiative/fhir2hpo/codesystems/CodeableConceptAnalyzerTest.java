@@ -14,7 +14,7 @@ import org.monarchinitiative.fhir2hpo.loinc.exception.UnmappedCodeableConceptExc
 import org.monarchinitiative.fhir2hpo.util.FhirMockUtils;
 
 public class CodeableConceptAnalyzerTest {
-	
+
 	@Test
 	public void testOneCode() throws ConversionException {
 		List<Coding> codings = new ArrayList<>();
@@ -34,7 +34,7 @@ public class CodeableConceptAnalyzerTest {
 		assertEquals("Expected internal code 'L' for external codes 'LL' and 'L'", "L", internalCode.name());
 	}
 
-    @Test(expected = UnmappedCodeableConceptException.class)
+	@Test(expected = UnmappedCodeableConceptException.class)
 	public void testUnmappedSystem() throws ConversionException {
 		List<Coding> codings = new ArrayList<>();
 		codings.add(FhirMockUtils.mockCoding("Other System", "LL"));
@@ -42,7 +42,7 @@ public class CodeableConceptAnalyzerTest {
 		CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
 	}
 
-    @Test(expected = UnmappedCodeableConceptException.class)
+	@Test(expected = UnmappedCodeableConceptException.class)
 	public void testUnmappedCode() throws ConversionException {
 		List<Coding> codings = new ArrayList<>();
 		codings.add(FhirMockUtils.mockCoding("http://hl7.org/fhir/v2/0078", "Other Code"));
@@ -50,7 +50,7 @@ public class CodeableConceptAnalyzerTest {
 		CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
 	}
 
-    @Test(expected = ConflictingInternalCodesException.class)
+	@Test(expected = ConflictingInternalCodesException.class)
 	public void testConflictingCodes() throws ConversionException {
 		List<Coding> codings = new ArrayList<>();
 		codings.add(FhirMockUtils.mockCoding("http://hl7.org/fhir/v2/0078", "LL"));
