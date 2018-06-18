@@ -124,13 +124,14 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 			if (!observationLoincId.equals(loincId)) {
 				throw new MismatchedLoincIdException("Can only convert observations with LoincId " + loincId);
 			}
+
+			result.addMethodConversionResult(convertInterpretation(observation));
+			result.addMethodConversionResult(convertValueQuantity(observation));
+			
 		} catch (Exception e) {
 			result.setException(e);
 		}
 
-		result.addMethodConversionResult(convertInterpretation(observation));
-		result.addMethodConversionResult(convertValueQuantity(observation));
-		
 		return result;
 	}
 
