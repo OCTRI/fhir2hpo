@@ -49,5 +49,10 @@ public class HpoTermWithNegation {
 		}
 		return hpoTerm.getId().equals(other.getHpoTerm().getId());
 	}
+	
+	@Override
+	public String toString() {
+		return hpoTerm.getName() + ":" + isNegated;
+	}
 
 }
