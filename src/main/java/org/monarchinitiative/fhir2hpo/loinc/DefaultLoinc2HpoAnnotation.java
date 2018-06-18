@@ -172,10 +172,10 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	 * 
 	 * @param code
 	 * @return the term with negation
-	 * @throws ConversionException
+	 * @throws UnmappedInternalCodeException
 	 */
 	private HpoTermWithNegation getHpoTermForInternalCode(Loinc2HpoCodedValue code)
-			throws ConversionException {
+			throws UnmappedInternalCodeException {
 		HpoTermWithNegation term = codeToHpoTerm.get(code);
 		if (term == null) {
 			throw new UnmappedInternalCodeException("The internal code " + code.name() + " has no HPO mapping for LOINC " + loincId.getCode());
