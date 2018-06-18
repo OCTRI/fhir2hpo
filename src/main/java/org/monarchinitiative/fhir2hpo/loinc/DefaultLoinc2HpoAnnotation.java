@@ -128,6 +128,10 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 			result.addMethodConversionResult(convertInterpretation(observation));
 			result.addMethodConversionResult(convertValueQuantity(observation));
 			
+			// ValueCodeableConcept might apply to Ord LOINCs. However, in examples we've seen the concept
+			// is encoded using a different system (e.g., SNOMED) so we would need to represent annotations
+			// in an advanced way. See: https://www.hl7.org/fhir/observation-example-f206-staphylococcus.json 
+			
 		} catch (Exception e) {
 			result.setException(e);
 		}
