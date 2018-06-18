@@ -1,7 +1,7 @@
 package org.monarchinitiative.fhir2hpo.loinc;
 
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
-import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException.LoincExceptionType;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincFormatException;
 
 public class LoincId {
 	
@@ -16,7 +16,7 @@ public class LoincId {
 		
 		this.code = code;
 		if (!code.matches("^\\d+-\\d+$")) {
-			throw new LoincException(LoincExceptionType.MALFORMED_LOINC_CODE, "The code " + code + " is not a valid LOINC format.");
+			throw new LoincFormatException("The code " + code + " is not a valid LOINC format.");
 		}
 	}
 	
@@ -31,7 +31,9 @@ public class LoincId {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) return true;
+        if (o == this) {
+			return true;
+		}
         if (!(o instanceof LoincId)) {
             return false;
         }

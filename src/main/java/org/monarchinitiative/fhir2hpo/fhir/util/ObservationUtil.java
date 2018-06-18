@@ -3,8 +3,9 @@ package org.monarchinitiative.fhir2hpo.fhir.util;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
+import org.monarchinitiative.fhir2hpo.loinc.exception.ConflictingLoincCodesException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincCodeNotFoundException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
-import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException.LoincExceptionType;
 
 public class ObservationUtil {
 
@@ -21,14 +22,14 @@ public class ObservationUtil {
 		for (Coding coding : observation.getCode().getCoding()) {
 			if (coding.getSystem().equals(LOINC_SYSTEM)) {
 				if (loincId != null && !loincId.getCode().equals(coding.getCode())) {
-					throw new LoincException(LoincExceptionType.CONFLICTING_LOINC_CODES);
+					throw new ConflictingLoincCodesException();
 				} else {
 					loincId = new LoincId(coding.getCode());
 				}
 			}
 		}
 		if (loincId == null) {
-			throw new LoincException(LoincExceptionType.LOINC_CODE_NOT_FOUND);
+			throw new LoincCodeNotFoundException();
 		}
 		return loincId;
 	}

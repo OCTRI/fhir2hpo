@@ -7,14 +7,19 @@ import java.util.Map;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationReferenceRangeComponent;
 import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.monarchinitiative.fhir2hpo.codesystems.CodeableConceptAnalyzer;
 import org.monarchinitiative.fhir2hpo.codesystems.Loinc2HpoCodedValue;
 import org.monarchinitiative.fhir2hpo.fhir.util.ObservationUtil;
+import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
+import org.monarchinitiative.fhir2hpo.hpo.MethodConversionResult;
+import org.monarchinitiative.fhir2hpo.loinc.exception.AmbiguousReferenceRangeException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException;
-import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException.ConversionExceptionType;
-import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.MismatchedLoincIdException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.MissingInterpretationException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.MissingValueQuantityException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.ReferenceRangeNotFoundException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.UnmappedInternalCodeException;
 
 /**
  * This represents the default annotation implementation where a single observation is parsed
@@ -28,16 +33,16 @@ import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
  */
 public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 
-	private LoincId loincId;
-	private LoincScale loincScale;
+	private final LoincId loincId;
+	private final LoincScale loincScale;
 	// Map from internal code to term including negation
-	private Map<Loinc2HpoCodedValue, HpoTermWithNegation> codeToHpoTerm;
+	private final Map<Loinc2HpoCodedValue, HpoTermWithNegation> codeToHpoTerm;
 
 	public static class Builder {
 
 		private LoincId loincId = null;
 		private LoincScale loincScale = null;
-		private Map<Loinc2HpoCodedValue, HpoTermWithNegation> codeToHpoTerm = new HashMap<>();
+		private final Map<Loinc2HpoCodedValue, HpoTermWithNegation> codeToHpoTerm = new HashMap<>();
 
 		/**
 		 * Set the LOINC Id
@@ -96,6 +101,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	 * 
 	 * @return the LOINC Id
 	 */
+	@Override
 	public LoincId getLoincId() {
 		return loincId;
 	}
@@ -104,30 +110,60 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	 * 
 	 * @return the LOINC scale
 	 */
+	@Override
 	public LoincScale getLoincScale() {
 		return loincScale;
 	}
 
 	@Override
-	public HpoTermWithNegation convert(Observation observation)
-			throws LoincException, ConversionException, FHIRException {
-
-		LoincId observationLoincId = ObservationUtil.getLoincIdOfObservation(observation);
-		if (!observationLoincId.equals(loincId)) {
-			throw new ConversionException(ConversionExceptionType.MISMATCHED_LOINC_ID, "Can only convert observations with LoincId " + loincId);
-		}
+	public HpoConversionResult convert(Observation observation) {
 		
-		if (observation.hasInterpretation()) {
-			Loinc2HpoCodedValue internalCode = CodeableConceptAnalyzer
-					.getInternalCodeForCodeableConcept(observation.getInterpretation());
-			return getHpoTermForInternalCode(internalCode);
+		HpoConversionResult result = new HpoConversionResult(observation);
+		try {
+			LoincId observationLoincId = ObservationUtil.getLoincIdOfObservation(observation);
+			if (!observationLoincId.equals(loincId)) {
+				throw new MismatchedLoincIdException("Can only convert observations with LoincId " + loincId);
+			}
+		} catch (Exception e) {
+			result.setException(e);
 		}
 
-		if (observation.hasValueQuantity()) {
-			return getHpoTermForValueQuantity(observation.getValueQuantity(), observation.getReferenceRange());
-		}
+		result.addMethodConversionResult(convertInterpretation(observation));
+		result.addMethodConversionResult(convertValueQuantity(observation));
+		
+		return result;
+	}
 
-		return null;
+	private MethodConversionResult convertInterpretation(Observation observation) {
+		MethodConversionResult result = new MethodConversionResult("Interpretation");
+		try {
+			if (observation.hasInterpretation()) {
+				Loinc2HpoCodedValue internalCode = CodeableConceptAnalyzer
+						.getInternalCodeForCodeableConcept(observation.getInterpretation());
+				HpoTermWithNegation hpoTerm = getHpoTermForInternalCode(internalCode);
+				result.succeed(hpoTerm);
+			} else {
+				throw new MissingInterpretationException();
+			}
+		} catch (Exception e) {
+			result.fail(e);
+		}
+		return result;
+	}
+
+	private MethodConversionResult convertValueQuantity(Observation observation) {
+		MethodConversionResult result = new MethodConversionResult("ValueQuantity");
+		try {
+			if (observation.hasValueQuantity()) {
+				HpoTermWithNegation hpoTerm = getHpoTermForValueQuantity(observation.getValueQuantity(), observation.getReferenceRange());
+				result.succeed(hpoTerm);
+			} else {
+				throw new MissingValueQuantityException();
+			}
+		} catch (Exception e) {
+			result.fail(e);
+		}
+		return result;
 	}
 
 	/**
@@ -141,7 +177,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 			throws ConversionException {
 		HpoTermWithNegation term = codeToHpoTerm.get(code);
 		if (term == null) {
-			throw new ConversionException(ConversionExceptionType.UNMAPPED_INTERNAL_CODE, "The internal code " + code.name() + " has no HPO mapping for LOINC " + loincId.getCode());
+			throw new UnmappedInternalCodeException("The internal code " + code.name() + " has no HPO mapping for LOINC " + loincId.getCode());
 		}
 		return term;
 	}
@@ -150,14 +186,14 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 			List<ObservationReferenceRangeComponent> referenceRange)
 			throws ConversionException {
 		if (referenceRange.size() < 1) {
-			throw new ConversionException(ConversionExceptionType.REFERENCE_RANGE_NOT_FOUND);
+			throw new ReferenceRangeNotFoundException();
 		} else if (referenceRange.size() > 1) {
 			// TODO: It can happen when there is actually one range but coded in three ranges
 			// e.g. normal 20-30
 			// in this case, one range ([20, 30]) is sufficient;
 			// however, it is written as three ranges: ( , 20) [20, 30] (30, )
 			// We should handle this case
-			throw new ConversionException(ConversionExceptionType.AMBIGUOUS_REFERENCE_RANGE);
+			throw new AmbiguousReferenceRangeException();
 		}
 
 		ObservationReferenceRangeComponent targetReference = referenceRange.get(0);
