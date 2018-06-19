@@ -8,12 +8,13 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.junit.Test;
+import org.monarchinitiative.fhir2hpo.loinc.exception.ConflictingInternalCodesException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException;
-import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException.ConversionExceptionType;
+import org.monarchinitiative.fhir2hpo.loinc.exception.UnmappedCodeableConceptException;
 import org.monarchinitiative.fhir2hpo.util.FhirMockUtils;
 
 public class CodeableConceptAnalyzerTest {
-	
+
 	@Test
 	public void testOneCode() throws ConversionException {
 		List<Coding> codings = new ArrayList<>();
@@ -33,38 +34,29 @@ public class CodeableConceptAnalyzerTest {
 		assertEquals("Expected internal code 'L' for external codes 'LL' and 'L'", "L", internalCode.name());
 	}
 
-	public void testUnmappedSystem() {
+	@Test(expected = UnmappedCodeableConceptException.class)
+	public void testUnmappedSystem() throws ConversionException {
 		List<Coding> codings = new ArrayList<>();
 		codings.add(FhirMockUtils.mockCoding("Other System", "LL"));
 		CodeableConcept codeableConcept = FhirMockUtils.mockCodeableConcept(codings);
-		try {
-			CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
-		} catch (ConversionException e) {
-			assertEquals("Expected the system to be unmapped", ConversionExceptionType.UNMAPPED_CODEABLE_CONCEPT, e.getType());
-		}
+		CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
 	}
 
-	public void testUnmappedCode() {
+	@Test(expected = UnmappedCodeableConceptException.class)
+	public void testUnmappedCode() throws ConversionException {
 		List<Coding> codings = new ArrayList<>();
 		codings.add(FhirMockUtils.mockCoding("http://hl7.org/fhir/v2/0078", "Other Code"));
 		CodeableConcept codeableConcept = FhirMockUtils.mockCodeableConcept(codings);
-		try {
-			CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
-		} catch (ConversionException e) {
-			assertEquals("Expected the code to be unmapped", ConversionExceptionType.UNMAPPED_CODEABLE_CONCEPT, e.getType());
-		}
+		CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
 	}
 
-	public void testConflictingCodes() {
+	@Test(expected = ConflictingInternalCodesException.class)
+	public void testConflictingCodes() throws ConversionException {
 		List<Coding> codings = new ArrayList<>();
 		codings.add(FhirMockUtils.mockCoding("http://hl7.org/fhir/v2/0078", "LL"));
 		codings.add(FhirMockUtils.mockCoding("http://hl7.org/fhir/v2/0078", "HH"));
 		CodeableConcept codeableConcept = FhirMockUtils.mockCodeableConcept(codings);
-		try {
-			CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
-		} catch (ConversionException e) {
-			assertEquals("Expected conflicting internal codes", ConversionExceptionType.CONFLICTING_INTERNAL_CODES, e.getType());
-		}
+		CodeableConceptAnalyzer.getInternalCodeForCodeableConcept(codeableConcept);
 	}
 
 }

@@ -6,8 +6,9 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.monarchinitiative.fhir2hpo.loinc.exception.ConflictingInternalCodesException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException;
-import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException.ConversionExceptionType;
+import org.monarchinitiative.fhir2hpo.loinc.exception.UnmappedCodeableConceptException;
 
 public class CodeableConceptAnalyzer {
 
@@ -28,9 +29,9 @@ public class CodeableConceptAnalyzer {
 					.map(coding -> CodeContainer.getInternalCode(coding)).filter(coding -> coding != null)
 					.collect(Collectors.toSet());
 			if (distinctCodes.size() == 0) {
-				throw new ConversionException(ConversionExceptionType.UNMAPPED_CODEABLE_CONCEPT);
+				throw new UnmappedCodeableConceptException();
 			} else if (distinctCodes.size() > 1) {
-				throw new ConversionException(ConversionExceptionType.CONFLICTING_INTERNAL_CODES,
+				throw new ConflictingInternalCodesException(
 						"The CodeableConcept resolves to multiple internal codes: " + distinctCodes.stream()
 								.map(Loinc2HpoCodedValue::toString).collect(Collectors.joining()));
 			} else {

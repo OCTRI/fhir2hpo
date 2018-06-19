@@ -1,12 +1,12 @@
 package org.monarchinitiative.fhir2hpo.loinc.exception;
 
 
-public abstract class ConversionException extends Exception {
-	
+public class LoincFormatException extends LoincException {
+
 	private static final long serialVersionUID = 1L;
 
-	public ConversionException(String message) {
+	public LoincFormatException(String message) {
 		super(message);
 	}
-	
+
 }

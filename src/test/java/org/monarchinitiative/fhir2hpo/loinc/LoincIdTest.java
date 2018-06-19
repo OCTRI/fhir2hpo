@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
-import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException.LoincExceptionType;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincFormatException;
 
 public class LoincIdTest {
 	
@@ -19,24 +19,17 @@ public class LoincIdTest {
         assertEquals(code,id.getCode());
     }
 
-    public void testMalformedCode() {
+ 
+    @Test(expected = LoincFormatException.class)
+    public void testMalformedCode() throws LoincException {
         String code = "15074-";
-        
-		try {
-			new LoincId(code);
-		} catch (LoincException e) {
-	        assertEquals("Expected malformed loinc exception", LoincExceptionType.MALFORMED_LOINC_CODE, e.getType());
-		}
+		new LoincId(code);
     }
 
-    public void testMalformedCode2() {
+    @Test(expected = LoincFormatException.class)
+    public void testMalformedCode2() throws LoincException {
         String code = "1507423";
-        
-		try {
-			new LoincId(code);
-		} catch (LoincException e) {
-	        assertEquals("Expected malformed loinc exception", LoincExceptionType.MALFORMED_LOINC_CODE, e.getType());
-		}
+		new LoincId(code);
     }
 
     @Test
