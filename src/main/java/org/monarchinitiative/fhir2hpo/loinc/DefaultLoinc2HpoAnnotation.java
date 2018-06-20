@@ -224,7 +224,6 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		sb.append(codeToHpoTerm.entrySet().stream().map(set -> set.toString()).collect(Collectors.joining(",")));
 		sb.append("}");
 		return sb.toString();
-		
 	}
 
 }
