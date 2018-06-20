@@ -3,6 +3,7 @@ package org.monarchinitiative.fhir2hpo.loinc;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationReferenceRangeComponent;
@@ -214,6 +215,15 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 			result = Loinc2HpoCodedValue.N;
 		}
 		return getHpoTermForInternalCode(result);
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(loincId.toString() + ": {");
+		sb.append(codeToHpoTerm.entrySet().stream().map(set -> set.toString()).collect(Collectors.joining(",")));
+		sb.append("}");
+		return sb.toString();
 	}
 
 }
