@@ -1,5 +1,7 @@
 package org.monarchinitiative.fhir2hpo.codesystems;
 
+import org.monarchinitiative.fhir2hpo.loinc.CodedValue;
+
 /**
  * Defines the 5 internal codes that all external system codes must be able to map to.
  * 

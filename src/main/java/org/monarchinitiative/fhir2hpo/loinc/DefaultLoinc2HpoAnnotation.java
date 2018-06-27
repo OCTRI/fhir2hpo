@@ -37,13 +37,15 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	private final LoincId loincId;
 	private final LoincScale loincScale;
 	// Map from internal code to term including negation
-	private final Map<Loinc2HpoCodedValue, HpoTermWithNegation> codeToHpoTerm;
+	// private final Map<Loinc2HpoCodedValue, HpoTermWithNegation> codeToHpoTerm;
+	// Here we have to use a more general map in order to deal with mappings from non-internal codes to HPO terms
+	private final Map<CodedValue, HpoTermWithNegation> codeToHpoTerm;
 
 	public static class Builder {
 
 		private LoincId loincId = null;
 		private LoincScale loincScale = null;
-		private final Map<Loinc2HpoCodedValue, HpoTermWithNegation> codeToHpoTerm = new HashMap<>();
+		private final Map<CodedValue, HpoTermWithNegation> codeToHpoTerm = new HashMap<>();
 
 		/**
 		 * Set the LOINC Id
@@ -68,12 +70,17 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		/**
 		 * Add an annotation in the advanced mode.
 		 * 
-		 * @param code
-		 * @param annotation
+		 * @param internalCode
+		 * @param term
 		 * @return
 		 */
 		public Builder addMapping(Loinc2HpoCodedValue internalCode, HpoTermWithNegation term) {
-			this.codeToHpoTerm.put(internalCode, term);
+			this.codeToHpoTerm.put(new CodedValue(internalCode), term);
+			return this;
+		}
+
+		public Builder addMapping(CodedValue codedValue, HpoTermWithNegation term) {
+			this.codeToHpoTerm.put(codedValue, term);
 			return this;
 		}
 
@@ -85,7 +92,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	}
 
 	private DefaultLoinc2HpoAnnotation(LoincId loincId, LoincScale loincScale,
-			Map<Loinc2HpoCodedValue, HpoTermWithNegation> codeToHpoTerm) {
+			Map<CodedValue, HpoTermWithNegation> codeToHpoTerm) {
 		this.loincId = loincId;
 		this.loincScale = loincScale;
 		this.codeToHpoTerm = codeToHpoTerm;
@@ -93,7 +100,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		// If a "normal" term is mapped but not an "abnormal" term, create one.
 		if (codeToHpoTerm.containsKey(Loinc2HpoCodedValue.N) && !codeToHpoTerm.containsKey(Loinc2HpoCodedValue.A)) {
 			HpoTermWithNegation normalTerm = codeToHpoTerm.get(Loinc2HpoCodedValue.N);
-			codeToHpoTerm.put(Loinc2HpoCodedValue.A,
+			codeToHpoTerm.put(new CodedValue(Loinc2HpoCodedValue.A),
 					new HpoTermWithNegation(normalTerm.getHpoTerm(), !normalTerm.isNegated()));
 		}
 	}
