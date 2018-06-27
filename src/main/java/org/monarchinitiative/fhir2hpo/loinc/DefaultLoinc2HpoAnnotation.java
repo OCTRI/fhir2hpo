@@ -38,7 +38,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	private final LoincScale loincScale;
 	// Map from internal code to term including negation
 	// private final Map<Loinc2HpoCodedValue, HpoTermWithNegation> codeToHpoTerm;
-	// Here we have to use a more general map in order to deal with mappings from non-internal codes to HPO terms
+	// Here we have to use a more general key in order to deal with mappings from non-internal codes
 	private final Map<CodedValue, HpoTermWithNegation> codeToHpoTerm;
 
 	public static class Builder {
@@ -75,7 +75,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		 * @return
 		 */
 		public Builder addMapping(Loinc2HpoCodedValue internalCode, HpoTermWithNegation term) {
-			this.codeToHpoTerm.put(new CodedValue(internalCode), term);
+			this.codeToHpoTerm.put(CodedValueAdapter4InternalCode.toCodedValue(internalCode), term);
 			return this;
 		}
 
@@ -98,9 +98,9 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		this.codeToHpoTerm = codeToHpoTerm;
 
 		// If a "normal" term is mapped but not an "abnormal" term, create one.
-		if (codeToHpoTerm.containsKey(Loinc2HpoCodedValue.N) && !codeToHpoTerm.containsKey(Loinc2HpoCodedValue.A)) {
-			HpoTermWithNegation normalTerm = codeToHpoTerm.get(Loinc2HpoCodedValue.N);
-			codeToHpoTerm.put(new CodedValue(Loinc2HpoCodedValue.A),
+		if (codeToHpoTerm.containsKey(CodedValueAdapter4InternalCode.toCodedValue(Loinc2HpoCodedValue.N)) && !codeToHpoTerm.containsKey(CodedValueAdapter4InternalCode.toCodedValue(Loinc2HpoCodedValue.A))) {
+			HpoTermWithNegation normalTerm = codeToHpoTerm.get(CodedValueAdapter4InternalCode.toCodedValue(Loinc2HpoCodedValue.N));
+			codeToHpoTerm.put(CodedValueAdapter4InternalCode.toCodedValue(Loinc2HpoCodedValue.A),
 					new HpoTermWithNegation(normalTerm.getHpoTerm(), !normalTerm.isNegated()));
 		}
 	}
@@ -179,20 +179,35 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		return result;
 	}
 
+	//TODO: a method that tries to map a coded value (such as system: snomed, code: S. aureus) into HPO without converting to an internal code
+	private MethodConversionResult convertCodedValue(Observation observation){
+		throw new UnsupportedOperationException();
+	}
+
 	/**
-	 * Given an internal code, return the corresponding HpoTerm or throw an exception.
-	 * 
+	 * Given a CodedValue, return the corresponding HpoTerm or throw an exception
+	 * @param code
+	 * @return
+	 * @throws UnmappedInternalCodeException
+	 */
+	private HpoTermWithNegation getHpoTermForCodedValue(CodedValue code) throws UnmappedInternalCodeException{
+		HpoTermWithNegation term = codeToHpoTerm.get(code);
+		if (term == null) {
+			throw new UnmappedInternalCodeException("The code " + code.getCoding().getCode() + " has no HPO mapping for LOINC " + loincId.getCode());
+		}
+		return term;
+	}
+
+	/**
+	 * A convenient method that, given an internal code, returns the corresponding HpoTerm or throw an exception.
+	 *
 	 * @param code
 	 * @return the term with negation
 	 * @throws UnmappedInternalCodeException
 	 */
 	private HpoTermWithNegation getHpoTermForInternalCode(Loinc2HpoCodedValue code)
-			throws UnmappedInternalCodeException {
-		HpoTermWithNegation term = codeToHpoTerm.get(code);
-		if (term == null) {
-			throw new UnmappedInternalCodeException("The internal code " + code.name() + " has no HPO mapping for LOINC " + loincId.getCode());
-		}
-		return term;
+		throws UnmappedInternalCodeException {
+		return getHpoTermForCodedValue(CodedValueAdapter4InternalCode.toCodedValue(code));
 	}
 
 	private HpoTermWithNegation getHpoTermForValueQuantity(Quantity valueQuantity,

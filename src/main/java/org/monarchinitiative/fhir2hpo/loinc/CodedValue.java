@@ -16,11 +16,6 @@ public class CodedValue {
 		this.coding.setSystem(system).setCode(code);
 	}
 
-	public CodedValue(Loinc2HpoCodedValue loinc2HpoCodedValue) {
-		this.coding = new Coding();
-		this.coding.setSystem(loinc2HpoCodedValue.getSystem()).setCode(loinc2HpoCodedValue.toString());
-	}
-
 	public Coding getCoding() {
 		return this.coding;
 	}
@@ -38,14 +33,19 @@ public class CodedValue {
 			return true;
 		}
 
-		if (! (o instanceof Coding)) {
+		if (! (o instanceof CodedValue)) {
 			return false;
 		}
 
-		Coding other = (Coding) o;
+		CodedValue other = (CodedValue) o;
 
-		return other.getSystem().equals(this.coding.getSystem())
-			&& other.getCode().equals(this.coding.getCode());
+		return other.getCoding().getSystem().equals(this.coding.getSystem())
+			&& other.getCoding().getCode().equals(this.coding.getCode());
+	}
+
+	@Override
+	public String toString() {
+		return "system: " + this.coding.getSystem() + " code: " + this.coding.getCode();
 	}
 
 }
