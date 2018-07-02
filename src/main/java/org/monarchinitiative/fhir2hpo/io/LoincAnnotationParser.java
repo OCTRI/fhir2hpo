@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.monarchinitiative.fhir2hpo.codesystems.Loinc2HpoCodedValue;
+import org.monarchinitiative.fhir2hpo.codesystems.HpoEncodedValue;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 import org.monarchinitiative.fhir2hpo.loinc.DefaultLoinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
@@ -33,6 +33,7 @@ public class LoincAnnotationParser {
 
 	private static final int COL_LOINC_ID = 0;
 	private static final int COL_LOINC_SCALE = 1;
+	private static final int COL_SYSTEM = 2;
 	private static final int COL_CODE = 3;
 	private static final int COL_HPO_TERM = 4;
 	private static final int COL_IS_NEGATED = 5;
@@ -53,6 +54,7 @@ public class LoincAnnotationParser {
 					if (finalized) {
 						LoincId loincId = new LoincId(elements[COL_LOINC_ID]);
 						LoincScale loincScale = LoincScale.string2enum(elements[COL_LOINC_SCALE]);
+						String system = elements[COL_SYSTEM];
 						String code = elements[COL_CODE];
 						TermId termId = ImmutableTermId.constructWithPrefix(elements[COL_HPO_TERM]);
 						boolean isNegated = Boolean.parseBoolean(elements[COL_IS_NEGATED]);
@@ -70,7 +72,7 @@ public class LoincAnnotationParser {
 						} else {
 							HpoTermWithNegation termWithNegation = new HpoTermWithNegation(term, isNegated);
 							try {
-								builders.get(loincId).addMapping(Loinc2HpoCodedValue.getCodedValue(code),
+								builders.get(loincId).addMapping(new HpoEncodedValue(system, code),
 										termWithNegation);
 							} catch (IllegalArgumentException e) {
 								logger.error("The code " + code + " cannot be mapped in Loinc2Hpo");
