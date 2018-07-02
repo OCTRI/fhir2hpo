@@ -40,23 +40,19 @@ public class HpoEncodedValue {
 	public int hashCode() {
 		final int prime = 31;
 		return this.coding.getSystem().hashCode() + prime * this.coding.getCode().hashCode();
-
 	}
-
+	
 	@Override
-	public boolean equals(Object o) {
-		if (o == this.coding) {
+	public boolean equals(Object obj) {
+		if (this == obj) {
 			return true;
 		}
-
-		if (! (o instanceof HpoEncodedValue)) {
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
 		}
-
-		HpoEncodedValue other = (HpoEncodedValue) o;
-
-		return other.getCoding().getSystem().equals(this.coding.getSystem())
-			&& other.getCoding().getCode().equals(this.coding.getCode());
+		HpoEncodedValue other = (HpoEncodedValue) obj;
+		return other.getCoding().getSystem().equals(this.coding.getSystem()) && 
+				other.getCoding().getCode().equals(this.coding.getCode());
 	}
 
 	@Override
