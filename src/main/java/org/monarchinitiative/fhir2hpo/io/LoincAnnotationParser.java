@@ -10,9 +10,12 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.monarchinitiative.fhir2hpo.codesystems.Loinc2HpoCodedValue;
+import org.monarchinitiative.fhir2hpo.codesystems.HpoEncodedValue;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
-import org.monarchinitiative.fhir2hpo.loinc.*;
+import org.monarchinitiative.fhir2hpo.loinc.DefaultLoinc2HpoAnnotation;
+import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
+import org.monarchinitiative.fhir2hpo.loinc.LoincId;
+import org.monarchinitiative.fhir2hpo.loinc.LoincScale;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -69,7 +72,7 @@ public class LoincAnnotationParser {
 						} else {
 							HpoTermWithNegation termWithNegation = new HpoTermWithNegation(term, isNegated);
 							try {
-								builders.get(loincId).addMapping(new CodedValue(system, code),
+								builders.get(loincId).addMapping(new HpoEncodedValue(system, code),
 										termWithNegation);
 							} catch (IllegalArgumentException e) {
 								logger.error("The code " + code + " cannot be mapped in Loinc2Hpo");

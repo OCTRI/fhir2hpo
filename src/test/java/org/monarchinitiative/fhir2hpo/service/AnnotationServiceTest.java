@@ -4,7 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
-import org.monarchinitiative.fhir2hpo.codesystems.Loinc2HpoCodedValue;
+import org.monarchinitiative.fhir2hpo.codesystems.HpoEncodedValue;
 import org.monarchinitiative.fhir2hpo.loinc.DefaultLoinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.LoincScale;
@@ -26,15 +26,15 @@ public class AnnotationServiceTest {
 		
 		LoincId loincId = new LoincId("15074-8");
 		DefaultLoinc2HpoAnnotation annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
-			.addMapping(Loinc2HpoCodedValue.L, HpoMockUtils.mockHpoTermWithNegation("Hypoglycemia", false))
-			.addMapping(Loinc2HpoCodedValue.N, HpoMockUtils.mockHpoTermWithNegation("Abnormality of blood glucose concentration", true))
-			.addMapping(Loinc2HpoCodedValue.H, HpoMockUtils.mockHpoTermWithNegation("Hyperglycemia", false)).build();
+			.addMapping(HpoEncodedValue.LOW, HpoMockUtils.mockHpoTermWithNegation("Hypoglycemia", false))
+			.addMapping(HpoEncodedValue.NORMAL, HpoMockUtils.mockHpoTermWithNegation("Abnormality of blood glucose concentration", true))
+			.addMapping(HpoEncodedValue.HIGH, HpoMockUtils.mockHpoTermWithNegation("Hyperglycemia", false)).build();
 
 		LoincId loincId2 = new LoincId("777-3");
 		DefaultLoinc2HpoAnnotation annotation2 = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
-			.addMapping(Loinc2HpoCodedValue.L, HpoMockUtils.mockHpoTermWithNegation("Thrombocytopenia", false))
-			.addMapping(Loinc2HpoCodedValue.N, HpoMockUtils.mockHpoTermWithNegation("Abnormal platelet count", true))
-			.addMapping(Loinc2HpoCodedValue.H, HpoMockUtils.mockHpoTermWithNegation("Thrombocytosis", false)).build();
+			.addMapping(HpoEncodedValue.LOW, HpoMockUtils.mockHpoTermWithNegation("Thrombocytopenia", false))
+			.addMapping(HpoEncodedValue.NORMAL, HpoMockUtils.mockHpoTermWithNegation("Abnormal platelet count", true))
+			.addMapping(HpoEncodedValue.HIGH, HpoMockUtils.mockHpoTermWithNegation("Thrombocytosis", false)).build();
 
 		// Mock the service to return annotations for two LOINCs
 		annotationService = mock(AnnotationService.class);

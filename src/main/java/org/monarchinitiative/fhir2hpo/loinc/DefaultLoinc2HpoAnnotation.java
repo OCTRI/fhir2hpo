@@ -9,7 +9,7 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationReferenceRangeComponent;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.monarchinitiative.fhir2hpo.codesystems.CodeableConceptAnalyzer;
-import org.monarchinitiative.fhir2hpo.codesystems.Loinc2HpoCodedValue;
+import org.monarchinitiative.fhir2hpo.codesystems.HpoEncodedValue;
 import org.monarchinitiative.fhir2hpo.fhir.util.ObservationUtil;
 import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
@@ -36,16 +36,14 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 
 	private final LoincId loincId;
 	private final LoincScale loincScale;
-	// Map from internal code to term including negation
-	// private final Map<Loinc2HpoCodedValue, HpoTermWithNegation> codeToHpoTerm;
-	// Here we have to use a more general key in order to deal with mappings from non-internal codes
-	private final Map<CodedValue, HpoTermWithNegation> codeToHpoTerm;
+	// Map from a coded value to term including negation
+	private final Map<HpoEncodedValue, HpoTermWithNegation> codeToHpoTerm;
 
 	public static class Builder {
 
 		private LoincId loincId = null;
 		private LoincScale loincScale = null;
-		private final Map<CodedValue, HpoTermWithNegation> codeToHpoTerm = new HashMap<>();
+		private final Map<HpoEncodedValue, HpoTermWithNegation> codeToHpoTerm = new HashMap<>();
 
 		/**
 		 * Set the LOINC Id
@@ -68,18 +66,13 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		}
 
 		/**
-		 * Add an annotation in the advanced mode.
+		 * Add a new mapping from a coded value to an HpoTermWithNegation
 		 * 
-		 * @param internalCode
+		 * @param codedValue
 		 * @param term
 		 * @return
 		 */
-		public Builder addMapping(Loinc2HpoCodedValue internalCode, HpoTermWithNegation term) {
-			this.codeToHpoTerm.put(CodedValueAdapter4InternalCode.toCodedValue(internalCode), term);
-			return this;
-		}
-
-		public Builder addMapping(CodedValue codedValue, HpoTermWithNegation term) {
+		public Builder addMapping(HpoEncodedValue codedValue, HpoTermWithNegation term) {
 			this.codeToHpoTerm.put(codedValue, term);
 			return this;
 		}
@@ -92,15 +85,15 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	}
 
 	private DefaultLoinc2HpoAnnotation(LoincId loincId, LoincScale loincScale,
-			Map<CodedValue, HpoTermWithNegation> codeToHpoTerm) {
+			Map<HpoEncodedValue, HpoTermWithNegation> codeToHpoTerm) {
 		this.loincId = loincId;
 		this.loincScale = loincScale;
 		this.codeToHpoTerm = codeToHpoTerm;
 
 		// If a "normal" term is mapped but not an "abnormal" term, create one.
-		if (codeToHpoTerm.containsKey(CodedValueAdapter4InternalCode.toCodedValue(Loinc2HpoCodedValue.N)) && !codeToHpoTerm.containsKey(CodedValueAdapter4InternalCode.toCodedValue(Loinc2HpoCodedValue.A))) {
-			HpoTermWithNegation normalTerm = codeToHpoTerm.get(CodedValueAdapter4InternalCode.toCodedValue(Loinc2HpoCodedValue.N));
-			codeToHpoTerm.put(CodedValueAdapter4InternalCode.toCodedValue(Loinc2HpoCodedValue.A),
+		if (codeToHpoTerm.containsKey(HpoEncodedValue.NORMAL) && !codeToHpoTerm.containsKey(HpoEncodedValue.ABNORMAL)) {
+			HpoTermWithNegation normalTerm = codeToHpoTerm.get(HpoEncodedValue.NORMAL);
+			codeToHpoTerm.put(HpoEncodedValue.ABNORMAL,
 					new HpoTermWithNegation(normalTerm.getHpoTerm(), !normalTerm.isNegated()));
 		}
 	}
@@ -151,7 +144,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		MethodConversionResult result = new MethodConversionResult("Interpretation");
 		try {
 			if (observation.hasInterpretation()) {
-				Loinc2HpoCodedValue internalCode = CodeableConceptAnalyzer
+				HpoEncodedValue internalCode = CodeableConceptAnalyzer
 						.getInternalCodeForCodeableConcept(observation.getInterpretation());
 				HpoTermWithNegation hpoTerm = getHpoTermForInternalCode(internalCode);
 				result.succeed(hpoTerm);
@@ -179,25 +172,6 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		return result;
 	}
 
-	//TODO: a method that tries to map a coded value (such as system: snomed, code: S. aureus) into HPO without converting to an internal code
-	private MethodConversionResult convertCodedValue(Observation observation){
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * Given a CodedValue, return the corresponding HpoTerm or throw an exception
-	 * @param code
-	 * @return
-	 * @throws UnmappedInternalCodeException
-	 */
-	private HpoTermWithNegation getHpoTermForCodedValue(CodedValue code) throws UnmappedInternalCodeException{
-		HpoTermWithNegation term = codeToHpoTerm.get(code);
-		if (term == null) {
-			throw new UnmappedInternalCodeException("The code " + code.getCoding().getCode() + " has no HPO mapping for LOINC " + loincId.getCode());
-		}
-		return term;
-	}
-
 	/**
 	 * A convenient method that, given an internal code, returns the corresponding HpoTerm or throw an exception.
 	 *
@@ -205,9 +179,13 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	 * @return the term with negation
 	 * @throws UnmappedInternalCodeException
 	 */
-	private HpoTermWithNegation getHpoTermForInternalCode(Loinc2HpoCodedValue code)
+	private HpoTermWithNegation getHpoTermForInternalCode(HpoEncodedValue code)
 		throws UnmappedInternalCodeException {
-		return getHpoTermForCodedValue(CodedValueAdapter4InternalCode.toCodedValue(code));
+		HpoTermWithNegation term = codeToHpoTerm.get(code);
+		if (term == null) {
+			throw new UnmappedInternalCodeException("The code " + code.getCoding().getCode() + " has no HPO mapping for LOINC " + loincId.getCode());
+		}
+		return term;
 	}
 
 	private HpoTermWithNegation getHpoTermForValueQuantity(Quantity valueQuantity,
@@ -228,13 +206,13 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		double low = targetReference.hasLow() ? targetReference.getLow().getValue().doubleValue() : Double.MIN_VALUE;
 		double high = targetReference.hasHigh() ? targetReference.getHigh().getValue().doubleValue() : Double.MAX_VALUE;
 		double observed = valueQuantity.getValue().doubleValue();
-		Loinc2HpoCodedValue result;
+		HpoEncodedValue result;
 		if (observed < low) {
-			result = Loinc2HpoCodedValue.L;
+			result = HpoEncodedValue.LOW;
 		} else if (observed > high) {
-			result = Loinc2HpoCodedValue.H;
+			result = HpoEncodedValue.HIGH;
 		} else {
-			result = Loinc2HpoCodedValue.N;
+			result = HpoEncodedValue.NORMAL;
 		}
 		return getHpoTermForInternalCode(result);
 	}
