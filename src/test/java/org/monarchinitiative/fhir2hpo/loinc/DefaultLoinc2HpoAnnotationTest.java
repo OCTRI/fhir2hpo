@@ -10,7 +10,7 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.monarchinitiative.fhir2hpo.codesystems.Loinc2HpoCodedValue;
+import org.monarchinitiative.fhir2hpo.codesystems.HpoEncodedValue;
 import org.monarchinitiative.fhir2hpo.config.FhirConfiguration;
 import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
@@ -45,10 +45,10 @@ public class DefaultLoinc2HpoAnnotationTest {
 
 		LoincId loincId = new LoincId("15074-8");
 		annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
-				.addMapping(Loinc2HpoCodedValue.L, HpoMockUtils.mockHpoTermWithNegation("Hypoglycemia", false))
-				.addMapping(Loinc2HpoCodedValue.N,
+				.addMapping(HpoEncodedValue.LOW, HpoMockUtils.mockHpoTermWithNegation("Hypoglycemia", false))
+				.addMapping(HpoEncodedValue.NORMAL,
 						HpoMockUtils.mockHpoTermWithNegation("Abnormality of blood glucose concentration", true))
-				.addMapping(Loinc2HpoCodedValue.H, HpoMockUtils.mockHpoTermWithNegation("Hyperglycemia", false))
+				.addMapping(HpoEncodedValue.HIGH, HpoMockUtils.mockHpoTermWithNegation("Hyperglycemia", false))
 				.build();
 
 	}
@@ -65,10 +65,10 @@ public class DefaultLoinc2HpoAnnotationTest {
 		// Tie the annotation to the code "0-0"
 		LoincId loincId = new LoincId("0-0");
 		annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
-				.addMapping(Loinc2HpoCodedValue.L, HpoMockUtils.mockHpoTermWithNegation("Hypoglycemia", false))
-				.addMapping(Loinc2HpoCodedValue.N,
+				.addMapping(HpoEncodedValue.LOW, HpoMockUtils.mockHpoTermWithNegation("Hypoglycemia", false))
+				.addMapping(HpoEncodedValue.NORMAL,
 						HpoMockUtils.mockHpoTermWithNegation("Abnormality of blood glucose concentration", true))
-				.addMapping(Loinc2HpoCodedValue.H, HpoMockUtils.mockHpoTermWithNegation("Hyperglycemia", false))
+				.addMapping(HpoEncodedValue.HIGH, HpoMockUtils.mockHpoTermWithNegation("Hyperglycemia", false))
 				.build();
 		
 		// Try to convert observation with the code 15074-8
@@ -104,8 +104,8 @@ public class DefaultLoinc2HpoAnnotationTest {
 		// The annotations do not provide a "High" mapping
 		LoincId loincId = new LoincId("15074-8");
 		annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
-				.addMapping(Loinc2HpoCodedValue.L, HpoMockUtils.mockHpoTermWithNegation("Hypoglycemia", false))
-				.addMapping(Loinc2HpoCodedValue.N,
+				.addMapping(HpoEncodedValue.LOW, HpoMockUtils.mockHpoTermWithNegation("Hypoglycemia", false))
+				.addMapping(HpoEncodedValue.NORMAL,
 						HpoMockUtils.mockHpoTermWithNegation("Abnormality of blood glucose concentration", true))
 				.build();
 		

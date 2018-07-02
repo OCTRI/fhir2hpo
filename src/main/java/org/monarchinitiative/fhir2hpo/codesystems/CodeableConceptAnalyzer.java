@@ -20,12 +20,12 @@ public class CodeableConceptAnalyzer {
 	 * @return the single internal code for the concept
 	 * @throws ConversionException
 	 */
-	public static Loinc2HpoCodedValue getInternalCodeForCodeableConcept(CodeableConcept codeableConcept)
+	public static HpoEncodedValue getInternalCodeForCodeableConcept(CodeableConcept codeableConcept)
 			throws ConversionException {
 
 		if (codeableConcept != null) {
 			List<Coding> codings = codeableConcept.getCoding();
-			Set<Loinc2HpoCodedValue> distinctCodes = codings.stream()
+			Set<HpoEncodedValue> distinctCodes = codings.stream()
 					.map(coding -> CodeContainer.getInternalCode(coding)).filter(coding -> coding != null)
 					.collect(Collectors.toSet());
 			if (distinctCodes.size() == 0) {
@@ -33,7 +33,7 @@ public class CodeableConceptAnalyzer {
 			} else if (distinctCodes.size() > 1) {
 				throw new ConflictingInternalCodesException(
 						"The CodeableConcept resolves to multiple internal codes: " + distinctCodes.stream()
-								.map(Loinc2HpoCodedValue::toString).collect(Collectors.joining()));
+								.map(HpoEncodedValue::toString).collect(Collectors.joining()));
 			} else {
 				return distinctCodes.iterator().next();
 			}
