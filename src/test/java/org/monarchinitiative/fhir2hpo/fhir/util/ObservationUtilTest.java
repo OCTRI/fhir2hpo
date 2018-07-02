@@ -25,30 +25,30 @@ import ca.uhn.fhir.parser.IParser;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = FhirConfiguration.class, loader = AnnotationConfigContextLoader.class)
 public class ObservationUtilTest {
-	
-    @Autowired
+
+	@Autowired
 	FhirContext fhirContext;
 
-    @Test(expected = LoincCodeNotFoundException.class)
+	@Test(expected = LoincCodeNotFoundException.class)
 	public void testNoLoincId() throws LoincException {
-    	Observation observation = getObservation("fhir/observation/noLoinc.json");	
-    	ObservationUtil.getLoincIdOfObservation(observation);
+		Observation observation = getObservation("fhir/observation/noLoinc.json");
+		ObservationUtil.getLoincIdOfObservation(observation);
 	}
 
-    @Test
+	@Test
 	public void testGetLoincIdOfObservation() throws LoincException {
-    	Observation observation = getObservation("fhir/observation/glucoseHigh.json");		
-    	LoincId loincId = ObservationUtil.getLoincIdOfObservation(observation);
-    	assertEquals("Expected Loinc Id of ", "15074-8", loincId.getCode());
+		Observation observation = getObservation("fhir/observation/glucoseHigh.json");
+		LoincId loincId = ObservationUtil.getLoincIdOfObservation(observation);
+		assertEquals("Expected Loinc Id of ", "15074-8", loincId.getCode());
 	}
 
 	@Test
 	public void testGetComponentLoincIdsOfObservation() throws LoincException {
-    	Observation observation = getObservation("fhir/observation/bloodPressureComponents.json");		
-    	Set<LoincId> loincs = ObservationUtil.getComponentLoincIdsOfObservation(observation);
-    	assertEquals("Expected 2 components", 2, loincs.size());
-    	assertTrue("Expected a loinc for systolic", loincs.contains(new LoincId("8480-6")));
-    	assertTrue("Expected a loinc for diastolic", loincs.contains(new LoincId("8462-4")));
+		Observation observation = getObservation("fhir/observation/bloodPressureComponents.json");
+		Set<LoincId> loincs = ObservationUtil.getComponentLoincIdsOfObservation(observation);
+		assertEquals("Expected 2 components", 2, loincs.size());
+		assertTrue("Expected a loinc for systolic", loincs.contains(new LoincId("8480-6")));
+		assertTrue("Expected a loinc for diastolic", loincs.contains(new LoincId("8462-4")));
 	}
 
 	// Parse an observation given the path to the file
