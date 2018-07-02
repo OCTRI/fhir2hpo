@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.monarchinitiative.fhir2hpo.io.LoincAnnotationParser;
 import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincNotAnnotatedException;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
 import org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -62,8 +63,12 @@ public class AnnotationService {
 		return loincMap;
 	}
 
-	public Loinc2HpoAnnotation getAnnotations(LoincId loincId) {
-		return loincMap.get(loincId);
+	public Loinc2HpoAnnotation getAnnotations(LoincId loincId) throws LoincNotAnnotatedException {
+		if (loincMap.containsKey(loincId)) {
+			return loincMap.get(loincId);
+		} else {
+			throw new LoincNotAnnotatedException("The LOINC Code " + loincId + " has not been annotated.");
+		}
 	}
 
 }
