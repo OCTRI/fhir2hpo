@@ -17,7 +17,7 @@ public class LoincId {
 	public LoincId(String code) throws LoincException {
 
 		this.code = code;
-		if (!code.matches("^\\d+-\\d+$")) {
+		if (code == null || !code.matches("^\\d+-\\d+$")) {
 			throw new LoincFormatException("The code " + code + " is not a valid LOINC format.");
 		}
 	}
