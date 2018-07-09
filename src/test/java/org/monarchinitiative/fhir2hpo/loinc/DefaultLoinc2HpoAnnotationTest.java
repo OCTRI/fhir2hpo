@@ -3,10 +3,6 @@ package org.monarchinitiative.fhir2hpo.loinc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +18,7 @@ import org.monarchinitiative.fhir2hpo.loinc.exception.MissingInterpretationExcep
 import org.monarchinitiative.fhir2hpo.loinc.exception.MissingValueQuantityException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ReferenceRangeNotFoundException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.UnmappedInternalCodeException;
+import org.monarchinitiative.fhir2hpo.util.FhirParseUtils;
 import org.monarchinitiative.fhir2hpo.util.HpoMockUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -29,7 +26,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = FhirConfiguration.class, loader = AnnotationConfigContextLoader.class)
@@ -55,7 +51,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	
 	@Test
 	public void testObservationWithoutLoinc() {
-		HpoConversionResult result = annotation.convert(getObservation("fhir/observation/noLoinc.json"));
+		HpoConversionResult result = annotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/noLoinc.json"));
 		assertTrue("The result has an exception", result.hasException());
 		assertEquals("Should not be able to convert observation without LoincId", LoincCodeNotFoundException.class, result.getException().getClass()); 
 	}
@@ -72,7 +68,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 				.build();
 		
 		// Try to convert observation with the code 15074-8
-		HpoConversionResult result = annotation.convert(getObservation("fhir/observation/glucoseHigh.json"));
+		HpoConversionResult result = annotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHigh.json"));
 		assertTrue("The result has an exception", result.hasException());
 		assertEquals("Should not be able to convert with mismatched LoincId", MismatchedLoincIdException.class, result.getException().getClass()); 
 	}
@@ -80,7 +76,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	@Test
 	public void testObservationWithInterpretation() {
 
-		HpoConversionResult result = annotation.convert(getObservation("fhir/observation/glucoseHigh.json"));
+		HpoConversionResult result = annotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHigh.json"));
 		assertTrue("The result succeeded", result.hasSuccess());
 		MethodConversionResult interpretationResult = result.getMethodResults().get("Interpretation");
 		HpoTermWithNegation term = interpretationResult.getTerm();
@@ -92,7 +88,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	@Test
 	public void testObservationWithoutInterpretation() {
 
-		HpoConversionResult result = annotation.convert(getObservation("fhir/observation/glucoseHighNoInterpretation.json"));
+		HpoConversionResult result = annotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHighNoInterpretation.json"));
 		MethodConversionResult interpretationResult = result.getMethodResults().get("Interpretation");
 		assertTrue("The interpretation result has an exception", interpretationResult.hasException());
 		assertEquals("Expected a missing interpretation exception", MissingInterpretationException.class, interpretationResult.getException().getClass());
@@ -109,7 +105,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 						HpoMockUtils.mockHpoTermWithNegation("Abnormality of blood glucose concentration", true))
 				.build();
 		
-		HpoConversionResult result = annotation.convert(getObservation("fhir/observation/glucoseHigh.json"));
+		HpoConversionResult result = annotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHigh.json"));
 		MethodConversionResult interpretationResult = result.getMethodResults().get("Interpretation");
 		assertTrue("The interpretation result has an exception", interpretationResult.hasException());
 		assertEquals("Expected an unmapped interpretation code exception", UnmappedInternalCodeException.class, interpretationResult.getException().getClass());
@@ -118,7 +114,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	@Test
 	public void testObservationWithValueQuantity() {
 
-		HpoConversionResult result = annotation.convert(getObservation("fhir/observation/glucoseHigh.json"));
+		HpoConversionResult result = annotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHigh.json"));
 		assertTrue("The result succeeded", result.hasSuccess());
 		MethodConversionResult valueQuantityResult = result.getMethodResults().get("ValueQuantity");
 		HpoTermWithNegation term = valueQuantityResult.getTerm();
@@ -130,7 +126,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	@Test
 	public void testObservationWithNoValueQuantity() {
 
-		HpoConversionResult result = annotation.convert(getObservation("fhir/observation/glucoseHighNoValueQuantity.json"));
+		HpoConversionResult result = annotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHighNoValueQuantity.json"));
 		MethodConversionResult valueQuantityResult = result.getMethodResults().get("ValueQuantity");
 		assertTrue("The value quantity result has an exception", valueQuantityResult.hasException());
 		assertEquals("Expected a missing value quantity exception", MissingValueQuantityException.class, valueQuantityResult.getException().getClass());
@@ -139,20 +135,12 @@ public class DefaultLoinc2HpoAnnotationTest {
 	@Test
 	public void testObservationWithNoReferenceRange() {
 
-		HpoConversionResult result = annotation.convert(getObservation("fhir/observation/glucoseHighNoReferenceRange.json"));
+		HpoConversionResult result = annotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHighNoReferenceRange.json"));
 		MethodConversionResult valueQuantityResult = result.getMethodResults().get("ValueQuantity");
 		assertTrue("The value quantity result has an exception", valueQuantityResult.hasException());
 		assertEquals("Expected a reference range not found exception", ReferenceRangeNotFoundException.class, valueQuantityResult.getException().getClass());
 	}
 
-	// Parse an observation given the path to the file
-	private Observation getObservation(String path) {
-
-		IParser parser = fhirContext.newJsonParser();
-		InputStream stream = this.getClass().getClassLoader().getResourceAsStream(path);
-		return (Observation) parser.parseResource(new InputStreamReader(stream));
-	}
-	
 	//TODO: May want other tests for these exceptions once we have a better understanding of expected formats
 	// AmbiguousReferenceRangeException
 	// ConflictingLoincCodesException
