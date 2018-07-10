@@ -55,7 +55,8 @@ public class CodeContainer {
 
     // Map from the code system (e.g., http://hl7.org/fhir/v2/0078) to the external code for that system to the corresponding internal code
     private static Map<String, Map<String, HpoEncodedValue>> codelists = Collections.unmodifiableMap(Stream.of(            
-    		new SimpleEntry<>("http://hl7.org/fhir/v2/0078", fhirv2interpretations))
+    		new SimpleEntry<>("http://hl7.org/fhir/v2/0078", fhirv2interpretations),
+    		new SimpleEntry<>("http://hl7.org/fhir/ValueSet/observation-interpretation", fhirv2interpretations))
             .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue())));
     
     /**
