@@ -30,13 +30,13 @@ public class ObservationUtilTest {
 	@Test(expected = LoincCodeNotFoundException.class)
 	public void testNoLoincId() throws LoincException {
 		Observation observation = FhirParseUtils.getObservation(fhirContext, "fhir/observation/noLoinc.json");
-		ObservationUtil.getLoincIdOfObservation(observation);
+		ObservationUtil.getLoincIdsOfObservation(observation);
 	}
 
 	@Test
-	public void testGetLoincIdOfObservation() throws LoincException {
+	public void testGetLoincIdsOfObservation() throws LoincException {
 		Observation observation = FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHigh.json");
-		LoincId loincId = ObservationUtil.getLoincIdOfObservation(observation);
+		LoincId loincId = ObservationUtil.getLoincIdsOfObservation(observation).iterator().next();
 		assertEquals("Expected Loinc Id of ", "15074-8", loincId.getCode());
 	}
 

@@ -3,6 +3,7 @@ package org.monarchinitiative.fhir2hpo.loinc;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Observation;
@@ -119,10 +120,10 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	@Override
 	public HpoConversionResult convert(Observation observation) {
 		
-		HpoConversionResult result = new HpoConversionResult(observation);
+		HpoConversionResult result = new HpoConversionResult(observation, loincId);
 		try {
-			LoincId observationLoincId = ObservationUtil.getLoincIdOfObservation(observation);
-			if (!observationLoincId.equals(loincId)) {
+			Set<LoincId> observationLoincIds = ObservationUtil.getLoincIdsOfObservation(observation);
+			if (!observationLoincIds.contains(loincId)) {
 				throw new MismatchedLoincIdException("Can only convert observations with LoincId " + loincId);
 			}
 
