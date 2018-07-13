@@ -56,6 +56,12 @@ public class DefaultLoinc2HpoAnnotationTest {
 		assertEquals("Should not be able to convert observation without LoincId", LoincCodeNotFoundException.class, result.getException().getClass()); 
 	}
 	
+	public void testObservationWithAdditionalLoinc() throws LoincException {
+		HpoConversionResult result = annotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHighMultipleLoincs.json"));
+		assertTrue("The conversion was successful", result.hasSuccess());
+		assertEquals("The LoincId for the annotation is recorded", new LoincId("15074-8"), result.getLoincId());
+	}
+	
 	@Test
 	public void testMismatchedLoincId() throws LoincException {
 		// Tie the annotation to the code "0-0"
@@ -143,6 +149,5 @@ public class DefaultLoinc2HpoAnnotationTest {
 
 	//TODO: May want other tests for these exceptions once we have a better understanding of expected formats
 	// AmbiguousReferenceRangeException
-	// ConflictingLoincCodesException
 
 }

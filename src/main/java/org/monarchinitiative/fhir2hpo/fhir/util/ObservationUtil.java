@@ -8,7 +8,6 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationComponentComponent;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
-import org.monarchinitiative.fhir2hpo.loinc.exception.ConflictingLoincCodesException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincCodeNotFoundException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 
@@ -22,8 +21,8 @@ public class ObservationUtil {
 	 * @return the single LoincId in the code section of the observation 
 	 * @throws LoincException
 	 */
-	public static LoincId getLoincIdOfObservation(Observation observation) throws LoincException {
-		return getLoincIdOfCodeableConcept(observation.getCode());
+	public static Set<LoincId> getLoincIdsOfObservation(Observation observation) throws LoincException {
+		return getLoincIdsOfCodeableConcept(observation.getCode());
 	}
 	
 	/**
@@ -33,13 +32,13 @@ public class ObservationUtil {
 	 * @throws LoincException
 	 */
 	public static Set<LoincId> getComponentLoincIdsOfObservation(Observation observation) throws LoincException {
+		// TODO: Make this more useable. We should return which components are associated with which loincs.
+		// Note that multiple loincs may be associated with a single component.
 		Set<LoincId> loincs = new HashSet<>();
 		for (ObservationComponentComponent component : observation.getComponent()) {
 			try {
-			   LoincId loinc = getLoincIdOfCodeableConcept(component.getCode());
-			   loincs.add(loinc);
-			} catch (ConflictingLoincCodesException e) {
-				throw(e);
+			   Set<LoincId> componentLoincs = getLoincIdsOfCodeableConcept(component.getCode());
+			   loincs.addAll(componentLoincs);
 			} catch (LoincCodeNotFoundException e) {
 				// Do nothing if a loinc is not found. Other components might have one.
 			}
@@ -47,23 +46,23 @@ public class ObservationUtil {
 		return loincs;
 	}
 	
-	// TODO: Only one Loinc per codeable concept is currently allowed. We should expand this, because this is not always 
-	// true in practice.
-	private static LoincId getLoincIdOfCodeableConcept(CodeableConcept codeableConcept) throws LoincException {
-		LoincId loincId = null;
+	/**
+	 * For a codeable concept, get any LOINC Ids associated
+	 * @param codeableConcept
+	 * @return
+	 * @throws LoincException
+	 */
+	private static Set<LoincId> getLoincIdsOfCodeableConcept(CodeableConcept codeableConcept) throws LoincException {
+		Set<LoincId> loincIds = new HashSet<>();
 		for (Coding coding : codeableConcept.getCoding()) {
 			if (coding.getSystem() != null && coding.getSystem().equals(LOINC_SYSTEM)) {
-				if (loincId != null && !loincId.getCode().equals(coding.getCode())) {
-					throw new ConflictingLoincCodesException();
-				} else {
-					loincId = new LoincId(coding.getCode());
-				}
+				loincIds.add(new LoincId(coding.getCode()));
 			}
 		}
-		if (loincId == null) {
+		if (loincIds.isEmpty()) {
 			throw new LoincCodeNotFoundException();
 		}
-		return loincId;
+		return loincIds;
 	}
 
 }

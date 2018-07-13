@@ -1,6 +1,9 @@
 package org.monarchinitiative.fhir2hpo.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.Test;
@@ -34,8 +37,9 @@ public class ObservationAnalysisServiceIntegrationTest {
     @Test
     public void testAnalyzeObservation() {
     	Observation observation = FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHigh.json");
-    	HpoConversionResult result = observationAnalysisService.analyzeObservation(observation);
-		assertTrue("The result succeeded", result.hasSuccess());
+    	List<HpoConversionResult> results = observationAnalysisService.analyzeObservation(observation);
+    	assertEquals("There is a single result", 1, results.size());
+		assertTrue("The result succeeded", results.get(0).hasSuccess());
     }
     
 }
