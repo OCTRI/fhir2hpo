@@ -11,6 +11,8 @@ import org.hl7.fhir.dstu3.model.Coding;
 //TODO: Consider allowing jar user to add their own mappings as original library did
 public class CodeContainer {
 	
+	public static final String CODING_VALUE_STRING = "valueString";
+	
 	private static Map<String,HpoEncodedValue> fhirv2interpretations = Collections.unmodifiableMap(Stream.of(
 			new SimpleEntry<>("<", HpoEncodedValue.LOW),
 			new SimpleEntry<>(">", HpoEncodedValue.HIGH),
@@ -52,11 +54,20 @@ public class CodeContainer {
 			new SimpleEntry<>("W", HpoEncodedValue.ABNORMAL),
 			new SimpleEntry<>("WR", HpoEncodedValue.HIGH))
             .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue())));
-
+	
+	// Known value strings that are interpretable
+	private static Map<String,HpoEncodedValue> valueStrings = Collections.unmodifiableMap(Stream.of(
+			new SimpleEntry<>("normal", HpoEncodedValue.NORMAL),
+			new SimpleEntry<>("negative", HpoEncodedValue.NORMAL),
+			new SimpleEntry<>("positive", HpoEncodedValue.HIGH),
+			new SimpleEntry<>("reactive", HpoEncodedValue.HIGH))			
+			.collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue())));
+	
     // Map from the code system (e.g., http://hl7.org/fhir/v2/0078) to the external code for that system to the corresponding internal code
     private static Map<String, Map<String, HpoEncodedValue>> codelists = Collections.unmodifiableMap(Stream.of(            
     		new SimpleEntry<>("http://hl7.org/fhir/v2/0078", fhirv2interpretations),
-    		new SimpleEntry<>("http://hl7.org/fhir/ValueSet/observation-interpretation", fhirv2interpretations))
+    		new SimpleEntry<>("http://hl7.org/fhir/ValueSet/observation-interpretation", fhirv2interpretations),
+    		new SimpleEntry<>(CODING_VALUE_STRING, valueStrings))
             .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue())));
     
     /**
