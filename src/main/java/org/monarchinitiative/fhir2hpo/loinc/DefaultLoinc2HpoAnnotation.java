@@ -6,9 +6,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationReferenceRangeComponent;
 import org.hl7.fhir.dstu3.model.Quantity;
+import org.monarchinitiative.fhir2hpo.codesystems.CodeContainer;
 import org.monarchinitiative.fhir2hpo.codesystems.CodeableConceptAnalyzer;
 import org.monarchinitiative.fhir2hpo.codesystems.HpoEncodedValue;
 import org.monarchinitiative.fhir2hpo.fhir.util.ObservationUtil;
@@ -20,15 +22,17 @@ import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.MismatchedLoincIdException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.MissingInterpretationException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.MissingValueQuantityException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.MissingValueStringException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ReferenceRangeNotFoundException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.UnmappedInternalCodeException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.UnmappedValueStringException;
 
 /**
  * This represents the default annotation implementation where a single observation is parsed
- * to determine the HPO mapping. It will try the following approaches in order:
+ * to determine the HPO mapping. It will try all the following approaches:
  * - Find HPO through interpretation CodeableConcept
  * - Find HPO through value quantity
- * - Find HPO through value CodeableConcept
+ * - Find HPO through value string
  * 
  * @author yateam
  *
@@ -129,6 +133,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 
 			result.addMethodConversionResult(convertInterpretation(observation));
 			result.addMethodConversionResult(convertValueQuantity(observation));
+			result.addMethodConversionResult(convertValueString(observation));
 			
 			// ValueCodeableConcept might apply to Ord LOINCs. However, in examples we've seen the concept
 			// is encoded using a different system (e.g., SNOMED) so we would need to represent annotations
@@ -166,6 +171,30 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 				result.succeed(hpoTerm);
 			} else {
 				throw new MissingValueQuantityException();
+			}
+		} catch (Exception e) {
+			result.fail(e);
+		}
+		return result;
+	}
+
+	private MethodConversionResult convertValueString(Observation observation) {
+		MethodConversionResult result = new MethodConversionResult("ValueString");
+		try {
+			if (observation.hasValueStringType()) {
+				// Normalize the value string and create a Coding to check against the CodeContainer mapping
+				Coding coding = new Coding(CodeContainer.CODING_VALUE_STRING, 
+						observation.getValueStringType().asStringValue().toLowerCase().trim(), 
+						CodeContainer.CODING_VALUE_STRING);
+				HpoEncodedValue internalCode = CodeContainer.getInternalCode(coding);
+				if (internalCode == null) {
+					throw new UnmappedValueStringException();
+				} else {
+					HpoTermWithNegation hpoTerm = getHpoTermForInternalCode(internalCode);
+					result.succeed(hpoTerm);
+				}
+			} else {
+				throw new MissingValueStringException();
 			}
 		} catch (Exception e) {
 			result.fail(e);
