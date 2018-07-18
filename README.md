@@ -1,8 +1,10 @@
 # FHIR to HPO
 
-This library converts FHIR STU3 Observations to HPO Terms when LOINC codes and interpretable values are present.
+This library converts FHIR STU3 Observations to Human Phenotype Ontology (HPO) Terms when LOINC codes and interpretable values are present.
 
-Compile the library and run the tests using `mvn clean install`.
+Using the jar requires local installation of the [monarch-initiative phenol library](https://github.com/monarch-initiative/phenol) that defines the domain around the HPO. 
+
+Once phenol is installed, compile the library and run the tests using `mvn clean install`.
 
 ## Using the library
 
@@ -70,7 +72,7 @@ The convert method actually passes back a list of conversion results. This is be
 }
 ```
 
-Converting this observation would result in two results, one for 55284-4 and another for 8716-3. The result contains a getter for the relevant LoincId and original Observation plus methods for interrogating success or failure of the conversion as a whole or specific methods.
+Converting this observation would return two results, one for 55284-4 and another for 8716-3. The HpoConversionResult contains getters for the relevant LoincId and original Observation plus methods for interrogating success or failure of the conversion as a whole or specific methods.
 
 The conversion as a whole may fail if Loinc codes are not found in the observation or are not annotated by the library. Assuming conversion is possible, three different methods are attempted. These will proceed regardless of the success or failure of previous methods.
 
