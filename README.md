@@ -11,11 +11,11 @@ Once phenol is installed, compile the library and run the tests using `mvn clean
 fhir2hpo can be included in your maven project as a dependency:
 
 ```
-		<dependency>
-			<groupId>org.monarchinitiative</groupId>
-			<artifactId>fhir2hpo</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+<dependency>
+	<groupId>org.monarchinitiative</groupId>
+	<artifactId>fhir2hpo</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+</dependency>
 ```
 
 Use the ObservationAnalysisService provided by this library to perform conversion. In a Spring Boot application, you can autowire this service and access the associated domain by scanning the fhir2hpo packages.
@@ -40,8 +40,8 @@ public class MyApp {
 Then pass STU3 observations to the service to convert:
 
 ```
-	Observation observation = getObservationFromFhirServer(...);
-	List<HpoConversionResult> hpoConversionResult = observationAnalysisService.convert(observation);
+Observation observation = getObservationFromFhirServer(...);
+List<HpoConversionResult> hpoConversionResult = observationAnalysisService.convert(observation);
 ```
 
 ## Understanding the HpoConversionResult
