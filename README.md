@@ -87,3 +87,5 @@ There are two open-source projects using the library that can serve as examples.
 This proof-of-concept [web application](https://github.com/OCTRI/poc-hpo-on-fhir) searches for users in the SMART Health IT STU3 sandbox and converts their observations to HPO Terms.
 
 This [statistics gatherer](https://github.com/OCTRI/f2hstats) collects observations from several sandboxes and stores the conversion results in a database where it is easy to qualify the types of observations encountered and the successes/failures of the library. Currently it can only communicate with a small set of unauthenticated sandboxes, but it can be easily adapted to capture real EHR data and even to obscure any PHI so that only aggregate informaton is recorded.
+
+The statistics gatherer also communicates with STU2 servers and provides an example of converting the responses to STU3 so they can be used by the library.
