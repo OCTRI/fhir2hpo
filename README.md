@@ -1,6 +1,6 @@
 # FHIR to HPO
 
-This library converts FHIR STU3 Observations to Human Phenotype Ontology (HPO) Terms when LOINC codes and interpretable values are present.
+This library converts FHIR STU3 Observations to Human Phenotype Ontology (HPO) Terms when LOINCs and interpretable values are present.
 
 Using the jar requires local installation of the [monarch-initiative phenol library](https://github.com/monarch-initiative/phenol) that defines the domain around the HPO. 
 
@@ -46,9 +46,9 @@ List<HpoConversionResult> hpoConversionResult = observationAnalysisService.conve
 
 ## Understanding the HpoConversionResult
 
-The conversion of an observation to an HpoTerm can fail for a variety of reasons. Conversion might also succeed using one method but fail using another. The entity HpoConversionResult is used to encapsulate the full context of the run so the consumer has detailed information and can decide how to handle.
+The conversion of an observation to an HpoTerm can fail for a variety of reasons. Conversion might also succeed using one method but fail using another. The entity HpoConversionResult encapsulates the full context of the run so the consumer has detailed information and can decide how to handle the result.
 
-The convert method actually passes back a list of conversion results. This is because in rare cases an Observation might contain multiple Loinc codes, and it is possible that these codes are annotated differently in our system. See the below example:
+The convert method actually passes back a list of conversion results. This is because in rare cases an Observation might contain multiple LOINCs, and it is possible that these codes are annotated differently in our system. See the below example:
 
 ```
 {
@@ -74,7 +74,7 @@ The convert method actually passes back a list of conversion results. This is be
 
 Converting this observation would return two results, one for 55284-4 and another for 8716-3. The HpoConversionResult contains getters for the relevant LoincId and original Observation plus methods for interrogating success or failure of the conversion as a whole or specific methods.
 
-The conversion as a whole may fail if Loinc codes are not found in the observation or are not annotated by the library. Assuming conversion is possible, three different methods are attempted. These will proceed regardless of the success or failure of previous methods.
+The conversion as a whole may fail if LOINCs are not found in the observation or are not annotated by the library. Assuming conversion is possible, three different methods are attempted. These will proceed regardless of the success or failure of previous methods.
 
 1. Interpretation: Look for an interpretation code in the observation that can be mapped to an HPO Term.
 2. Value Quantity and Reference Range: Determine whether the value is low, high, or within range and map to an Hpo Term
@@ -88,6 +88,6 @@ There are two open-source projects using the library that can serve as examples.
 
 This proof-of-concept [web application](https://github.com/OCTRI/poc-hpo-on-fhir) searches for users in the SMART Health IT STU3 sandbox and converts their observations to HPO Terms.
 
-This [statistics gatherer](https://github.com/OCTRI/f2hstats) collects observations from several sandboxes and stores the conversion results in a database where it is easy to qualify the types of observations encountered and the successes/failures of the library. Currently it can only communicate with a small set of unauthenticated sandboxes, but it can be easily adapted to capture real EHR data and even to obscure any PHI so that only aggregate informaton is recorded.
+This [statistics gatherer](https://github.com/OCTRI/f2hstats) collects observations from several sandboxes and stores the conversion results in a database where it is easy to qualify the types of observations encountered and the successes/failures of the library. Currently it can only communicate with a small set of unauthenticated sandboxes, but it can be easily adapted to capture real EHR data and even to obscure any PHI so that only aggregate information is recorded.
 
 The statistics gatherer also communicates with STU2 servers and provides an example of converting the responses to STU3 so they can be used by the library.
