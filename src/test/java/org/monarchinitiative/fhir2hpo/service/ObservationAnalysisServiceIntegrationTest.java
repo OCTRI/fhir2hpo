@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.monarchinitiative.fhir2hpo.config.FhirConfiguration;
 import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
+import org.monarchinitiative.fhir2hpo.loinc.exception.NonInterpretableLoincException;
 import org.monarchinitiative.fhir2hpo.util.FhirParseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -41,5 +42,14 @@ public class ObservationAnalysisServiceIntegrationTest {
     	assertEquals("There is a single result", 1, results.size());
 		assertTrue("The result succeeded", results.get(0).hasSuccess());
     }
-    
+
+    @Test
+    public void testNonInterpetableObservation() {
+    	Observation observation = FhirParseUtils.getObservation(fhirContext, "fhir/observation/nonInterpretableLoinc.json");
+    	List<HpoConversionResult> results = observationAnalysisService.analyzeObservation(observation);
+    	assertEquals("There is a single result", 1, results.size());
+		assertTrue("The result failed", results.get(0).hasException());
+		assertTrue("The exception indicates the LOINC is not interpretable.", results.get(0).getException() instanceof NonInterpretableLoincException);
+    }
+
 }

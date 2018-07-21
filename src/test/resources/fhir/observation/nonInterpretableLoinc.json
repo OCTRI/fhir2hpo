@@ -1,0 +1,44 @@
+{
+  "resourceType": "Observation",
+  "id": "f001",
+  "text": {
+    "status": "generated"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://www.fake.url",
+      "value": "9999"
+    }
+  ],
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "1752-5",
+        "display": "Albumin [Mass/​volume] in Synovial fluid"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/f001",
+    "display": "P. van de Heuvel"
+  },
+  "effectivePeriod": {
+    "start": "2013-04-02T09:30:10+01:00"
+  },
+  "issued": "2013-04-03T15:30:10+01:00",
+  "performer": [
+    {
+      "reference": "Practitioner/f005",
+      "display": "A. Langeveld"
+    }
+  ],
+  "valueQuantity": {
+    "value": 999,
+    "unit": "g/dL",
+    "system": "http://unitsofmeasure.org",
+    "code": "g/dL"
+  }
+}

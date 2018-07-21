@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.monarchinitiative.fhir2hpo.io.LoincAnnotationParser;
+import org.monarchinitiative.fhir2hpo.io.NonInterpretableLoincParser;
 import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincNotAnnotatedException;
@@ -33,9 +34,13 @@ public class AnnotationService {
 	
 	public AnnotationService() throws IOException {
 
+		ClassLoader classLoader = getClass().getClassLoader();
+
+		// First load the noninterpretable LOINCs
+        loincMap = NonInterpretableLoincParser.parse(classLoader.getResourceAsStream("noninterpretable-annotations.tsv"));
+
 		// TODO: Find a better option for these resources. They have to be retrieved as a stream once they are packaged
 		// into a jar, but the HpoOboParser requires a file
-		ClassLoader classLoader = getClass().getClassLoader();
 		InputStream stream = classLoader.getResourceAsStream("hp.obo");
 		File hpo = new File("hp.tmp");
 		java.nio.file.Files.copy(stream,
@@ -56,7 +61,8 @@ public class AnnotationService {
         res.forEach( term -> termmapBuilder.put(term.getId(), term));
         ImmutableMap<TermId, Term> termmap = termmapBuilder.build();
 
-       this.loincMap = LoincAnnotationParser.parse(classLoader.getResourceAsStream("annotations.tsv"), termmap);
+        // Now load the standard annotations.
+        loincMap.putAll(LoincAnnotationParser.parse(classLoader.getResourceAsStream("annotations.tsv"), termmap));
 	}
 	
 	public Map<LoincId, Loinc2HpoAnnotation> getAnnotationsMap() {
