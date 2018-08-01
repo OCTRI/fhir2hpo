@@ -14,7 +14,6 @@ import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 import org.monarchinitiative.fhir2hpo.util.HpoMockUtils;
-import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
@@ -27,13 +26,13 @@ public class LoincAnnotationParserTest {
 		InputStream annotationsResource = getClass().getClassLoader().getResourceAsStream("annotations.tsv");
 		
 		Map<TermId, Term> hpoTermMap = new LinkedHashMap<>();
-		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0001873"), HpoMockUtils.mockTerm("Thrombocytopenia"));
-		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0011873"), HpoMockUtils.mockTerm("Abnormal platelet count"));
-		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0001894"), HpoMockUtils.mockTerm("Thrombocytosis"));
-		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0001943"), HpoMockUtils.mockTerm("Hypoglycemia"));
-		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0011015"), HpoMockUtils.mockTerm("Abnormality of blood glucose concentration"));
-		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0003074"), HpoMockUtils.mockTerm("Hyperglycemia"));
-		hpoTermMap.put(ImmutableTermId.constructWithPrefix("HP:0003541"), HpoMockUtils.mockTerm("Urinary glycosaminoglycan excretion"));
+		hpoTermMap.put(TermId.constructWithPrefix("HP:0001873"), HpoMockUtils.mockTerm("Thrombocytopenia"));
+		hpoTermMap.put(TermId.constructWithPrefix("HP:0011873"), HpoMockUtils.mockTerm("Abnormal platelet count"));
+		hpoTermMap.put(TermId.constructWithPrefix("HP:0001894"), HpoMockUtils.mockTerm("Thrombocytosis"));
+		hpoTermMap.put(TermId.constructWithPrefix("HP:0001943"), HpoMockUtils.mockTerm("Hypoglycemia"));
+		hpoTermMap.put(TermId.constructWithPrefix("HP:0011015"), HpoMockUtils.mockTerm("Abnormality of blood glucose concentration"));
+		hpoTermMap.put(TermId.constructWithPrefix("HP:0003074"), HpoMockUtils.mockTerm("Hyperglycemia"));
+		hpoTermMap.put(TermId.constructWithPrefix("HP:0003541"), HpoMockUtils.mockTerm("Urinary glycosaminoglycan excretion"));
 		annotations = LoincAnnotationParser.parse(annotationsResource, hpoTermMap);
 	}
 	
