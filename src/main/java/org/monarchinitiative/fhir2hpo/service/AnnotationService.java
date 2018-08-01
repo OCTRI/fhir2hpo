@@ -13,8 +13,9 @@ import org.monarchinitiative.fhir2hpo.io.NonInterpretableLoincParser;
 import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincNotAnnotatedException;
+import org.monarchinitiative.phenol.base.PhenolException;
 import org.monarchinitiative.phenol.formats.hpo.HpoOntology;
-import org.monarchinitiative.phenol.io.obo.hpo.HpoOboParser;
+import org.monarchinitiative.phenol.io.obo.hpo.HpOboParser;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class AnnotationService {
 
 	Map<LoincId, Loinc2HpoAnnotation> loincMap;
 	
-	public AnnotationService() throws IOException {
+	public AnnotationService() throws IOException, PhenolException {
 
 		ClassLoader classLoader = getClass().getClassLoader();
 
@@ -49,7 +50,7 @@ public class AnnotationService {
 		stream.close();
 				
 		//File hpo = new File(classLoader.getResource("hp.obo").getFile());
-		HpoOboParser hpoOboParser = new HpoOboParser(hpo);
+		HpOboParser hpoOboParser = new HpOboParser(hpo);
 		HpoOntology ontology = hpoOboParser.parse();
 		
         ImmutableMap.Builder<TermId,Term> termmapBuilder = new ImmutableMap.Builder<>();

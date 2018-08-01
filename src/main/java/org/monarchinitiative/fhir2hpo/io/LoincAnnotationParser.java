@@ -17,9 +17,8 @@ import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.LoincScale;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
-import org.monarchinitiative.phenol.ontology.data.ImmutableTermId;
-import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenol.ontology.data.Term;
 
 /**
  * Parse the standard tab-delimited annotations file and construct the annotation map.
@@ -56,7 +55,7 @@ public class LoincAnnotationParser {
 						LoincScale loincScale = LoincScale.string2enum(elements[COL_LOINC_SCALE]);
 						String system = elements[COL_SYSTEM];
 						String code = elements[COL_CODE];
-						TermId termId = ImmutableTermId.constructWithPrefix(elements[COL_HPO_TERM]);
+						TermId termId = TermId.constructWithPrefix(elements[COL_HPO_TERM]);
 						boolean isNegated = Boolean.parseBoolean(elements[COL_IS_NEGATED]);
 
 						if (!builders.containsKey(loincId)) {

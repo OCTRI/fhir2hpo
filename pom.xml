@@ -22,7 +22,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		<phenol.version>1.0.0</phenol.version>
+		<phenol.version>1.2.0</phenol.version>
 	</properties>
 
 	<dependencies>
@@ -65,22 +65,6 @@
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.httpcomponents</groupId>
-					<artifactId>httpclient</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.github.jsonld-java</groupId>
-					<artifactId>jsonld-java</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.inject</groupId>
-					<artifactId>guice</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
