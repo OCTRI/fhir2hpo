@@ -52,7 +52,7 @@ public class HpoTermWithNegation {
 	
 	@Override
 	public String toString() {
-		return hpoTerm.getName() + ":" + isNegated;
+		return (isNegated?"NOT ":"") + hpoTerm.getName();
 	}
 
 }
