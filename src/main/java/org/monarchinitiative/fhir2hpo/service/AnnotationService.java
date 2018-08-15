@@ -1,9 +1,10 @@
 package org.monarchinitiative.fhir2hpo.service;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.StandardCopyOption;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * This service keeps track of the annotations for all LOINC Codes. 
+ * This service keeps track of the annotations for all LOINC Codes.
  * 
  * @author yateam
  *
@@ -32,40 +33,34 @@ import com.google.common.collect.ImmutableMap;
 public class AnnotationService {
 
 	Map<LoincId, Loinc2HpoAnnotation> loincMap;
-	
-	public AnnotationService() throws IOException, PhenolException {
+
+	public AnnotationService() throws IOException, PhenolException, URISyntaxException {
 
 		ClassLoader classLoader = getClass().getClassLoader();
 
 		// First load the noninterpretable LOINCs
-        loincMap = NonInterpretableLoincParser.parse(classLoader.getResourceAsStream("noninterpretable-annotations.tsv"));
+		loincMap = NonInterpretableLoincParser
+				.parse(classLoader.getResourceAsStream("noninterpretable-annotations.tsv"));
 
-		// TODO: Find a better option for these resources. They have to be retrieved as a stream once they are packaged
-		// into a jar, but the HpoOboParser requires a file
-		InputStream stream = classLoader.getResourceAsStream("hp.obo");
-		File hpo = new File("hp.tmp");
-		java.nio.file.Files.copy(stream,
-				hpo.toPath(), 
-				StandardCopyOption.REPLACE_EXISTING);
-		stream.close();
-				
-		//File hpo = new File(classLoader.getResource("hp.obo").getFile());
-		HpOboParser hpoOboParser = new HpOboParser(hpo);
+		// Load the HPO
+		URL url = classLoader.getResource("hp.obo");
+		Path p = Paths.get(url.toURI());
+		HpOboParser hpoOboParser = new HpOboParser(p.toFile());
 		HpoOntology ontology = hpoOboParser.parse();
-		
-        ImmutableMap.Builder<TermId,Term> termmapBuilder = new ImmutableMap.Builder<>();
-        // for some reason there is a bug here...issue #34 on ontolib tracker
-        // here is a workaround to remove duplicate entries
-        List<Term> res = ontology.getTermMap().values().stream().distinct()
-                .collect(Collectors.toList());
 
-        res.forEach( term -> termmapBuilder.put(term.getId(), term));
-        ImmutableMap<TermId, Term> termmap = termmapBuilder.build();
+		ImmutableMap.Builder<TermId, Term> termmapBuilder = new ImmutableMap.Builder<>();
+		// for some reason there is a bug here...issue #34 on ontolib tracker
+		// here is a workaround to remove duplicate entries
+		List<Term> res = ontology.getTermMap().values().stream().distinct()
+				.collect(Collectors.toList());
 
-        // Now load the standard annotations.
-        loincMap.putAll(LoincAnnotationParser.parse(classLoader.getResourceAsStream("annotations.tsv"), termmap));
+		res.forEach(term -> termmapBuilder.put(term.getId(), term));
+		ImmutableMap<TermId, Term> termmap = termmapBuilder.build();
+
+		// Now load the standard annotations.
+		loincMap.putAll(LoincAnnotationParser.parse(classLoader.getResourceAsStream("annotations.tsv"), termmap));
 	}
-	
+
 	public Map<LoincId, Loinc2HpoAnnotation> getAnnotationsMap() {
 		return loincMap;
 	}
