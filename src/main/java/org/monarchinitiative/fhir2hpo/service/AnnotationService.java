@@ -48,8 +48,7 @@ public class AnnotationService {
 				hpo.toPath(), 
 				StandardCopyOption.REPLACE_EXISTING);
 		stream.close();
-				
-		//File hpo = new File(classLoader.getResource("hp.obo").getFile());
+		
 		HpOboParser hpoOboParser = new HpOboParser(hpo);
 		HpoOntology ontology = hpoOboParser.parse();
 		
