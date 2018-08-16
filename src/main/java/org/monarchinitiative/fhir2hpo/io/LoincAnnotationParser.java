@@ -18,7 +18,6 @@ import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.LoincScale;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenol.ontology.data.Term;
 
 /**
  * Parse the standard tab-delimited annotations file and construct the annotation map.
@@ -39,7 +38,7 @@ public class LoincAnnotationParser {
 	private static final int COL_IS_FINALIZED = 11;
 	private static final int NUM_COL = 13;
 
-	public static Map<LoincId, Loinc2HpoAnnotation> parse(InputStream stream, Map<TermId, Term> hpoTermMap)
+	public static Map<LoincId, Loinc2HpoAnnotation> parse(InputStream stream)
 			throws FileNotFoundException {
 
 		Map<LoincId, DefaultLoinc2HpoAnnotation.Builder> builders = new LinkedHashMap<>();
@@ -63,20 +62,14 @@ public class LoincAnnotationParser {
 							builders.get(loincId).setLoincId(loincId).setLoincScale(loincScale);
 						}
 
-						Term term = hpoTermMap.get(termId);
-						if (term == null) {
-							// This should not be an issue in the long run, but for now there may be disconnects in what
-							// terms are annotated versus what terms are released in the hpo.
-							logger.error("The HPO Term could not be found for Term Id " + termId);
-						} else {
-							HpoTermWithNegation termWithNegation = new HpoTermWithNegation(term, isNegated);
-							try {
-								builders.get(loincId).addMapping(new HpoEncodedValue(system, code),
-										termWithNegation);
-							} catch (IllegalArgumentException e) {
-								logger.error("The code " + code + " cannot be mapped in Loinc2Hpo");
-							}
+						HpoTermWithNegation termWithNegation = new HpoTermWithNegation(termId, isNegated);
+						try {
+							builders.get(loincId).addMapping(new HpoEncodedValue(system, code),
+									termWithNegation);
+						} catch (IllegalArgumentException e) {
+							logger.error("The code " + code + " cannot be mapped in Loinc2Hpo");
 						}
+						
 					}
 				} catch (LoincException e) {
 					logger.error("Malformed loinc code line: " + serialized);

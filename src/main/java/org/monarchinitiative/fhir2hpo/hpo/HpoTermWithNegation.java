@@ -1,19 +1,19 @@
 package org.monarchinitiative.fhir2hpo.hpo;
 
-import org.monarchinitiative.phenol.ontology.data.Term;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 
 public class HpoTermWithNegation {
 
-	private final Term hpoTerm;
+	private final TermId hpoTermId;
 	private final boolean isNegated;
 
-	public HpoTermWithNegation(Term hpoTerm, boolean isNegated) {
-		this.hpoTerm = hpoTerm;
+	public HpoTermWithNegation(TermId hpoTermId, boolean isNegated) {
+		this.hpoTermId = hpoTermId;
 		this.isNegated = isNegated;
 	}
 
-	public Term getHpoTerm() {
-		return hpoTerm;
+	public TermId getHpoTermId() {
+		return hpoTermId;
 	}
 
 	public boolean isNegated() {
@@ -24,7 +24,7 @@ public class HpoTermWithNegation {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((hpoTerm == null) ? 0 : hpoTerm.hashCode());
+		result = prime * result + ((hpoTermId == null) ? 0 : hpoTermId.hashCode());
 		result = prime * result + (isNegated ? 1231 : 1237);
 		return result;
 	}
@@ -41,18 +41,13 @@ public class HpoTermWithNegation {
 		if (isNegated != other.isNegated) {
 			return false;
 		}
-		if (hpoTerm == null && other.getHpoTerm() == null) {
+		if (hpoTermId == null && other.getHpoTermId() == null) {
 			return true;
 		}
-		if ((hpoTerm == null && other.getHpoTerm() != null) || (hpoTerm != null && other.getHpoTerm() == null)) {
+		if ((hpoTermId == null && other.getHpoTermId() != null) || (hpoTermId != null && other.getHpoTermId() == null)) {
 			return false;
 		}
-		return hpoTerm.getId().equals(other.getHpoTerm().getId());
+		return hpoTermId.getId().equals(other.getHpoTermId().getId());
 	}
 	
-	@Override
-	public String toString() {
-		return (isNegated?"NOT ":"") + hpoTerm.getName();
-	}
-
 }
