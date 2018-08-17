@@ -1,8 +1,12 @@
 package org.monarchinitiative.fhir2hpo.loinc;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
+import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 import org.monarchinitiative.fhir2hpo.loinc.exception.NonInterpretableLoincException;
 
 /**
@@ -34,6 +38,11 @@ public class NonInterpretableLoincAnnotation implements Loinc2HpoAnnotation {
 	@Override
 	public LoincScale getLoincScale() {
 		return loincScale;
+	}
+
+	@Override
+	public Collection<HpoTermWithNegation> getHpoTerms() {
+		return new ArrayList<>();
 	}
 
 	@Override

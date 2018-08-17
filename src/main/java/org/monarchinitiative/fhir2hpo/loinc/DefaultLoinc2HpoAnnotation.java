@@ -1,5 +1,6 @@
 package org.monarchinitiative.fhir2hpo.loinc;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	// Map from a coded value to term including negation
 	private final Map<HpoEncodedValue, HpoTermWithNegation> codeToHpoTerm;
 
+	
 	public static class Builder {
 
 		private LoincId loincId = null;
@@ -99,7 +101,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		if (codeToHpoTerm.containsKey(HpoEncodedValue.NORMAL) && !codeToHpoTerm.containsKey(HpoEncodedValue.ABNORMAL)) {
 			HpoTermWithNegation normalTerm = codeToHpoTerm.get(HpoEncodedValue.NORMAL);
 			codeToHpoTerm.put(HpoEncodedValue.ABNORMAL,
-					new HpoTermWithNegation(normalTerm.getHpoTerm(), !normalTerm.isNegated()));
+					new HpoTermWithNegation(normalTerm.getHpoTermId(), !normalTerm.isNegated()));
 		}
 	}
 
@@ -119,6 +121,11 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	@Override
 	public LoincScale getLoincScale() {
 		return loincScale;
+	}
+	
+	@Override
+	public Collection<HpoTermWithNegation> getHpoTerms() {
+		return codeToHpoTerm.values();
 	}
 
 	@Override
