@@ -30,6 +30,11 @@ import ca.uhn.fhir.context.FhirContext;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = FhirConfiguration.class, loader = AnnotationConfigContextLoader.class)
 public class DefaultLoinc2HpoAnnotationTest {
+	
+	private final static String GLUCOSE_LOINC = "15074-8";
+	private final static HpoTermWithNegation HYPOGLYCEMIA = HpoMockUtils.getHpoTermWithNegation("HP:0001943", false);
+	private final static HpoTermWithNegation NOT_ABNORMAL_BLOOD_GLUCOSE = HpoMockUtils.getHpoTermWithNegation("HP:0011015", true);
+	private final static HpoTermWithNegation HYPERGLYCEMIA = HpoMockUtils.getHpoTermWithNegation("HP:0003074", false);
 
     @Autowired
 	FhirContext fhirContext;
@@ -39,14 +44,20 @@ public class DefaultLoinc2HpoAnnotationTest {
 	@Before
 	public void setup() throws LoincException {
 
-		LoincId loincId = new LoincId("15074-8");
+		LoincId loincId = new LoincId(GLUCOSE_LOINC);
 		annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
-				.addMapping(HpoEncodedValue.LOW, HpoMockUtils.mockHpoTermWithNegation("HP:0001943", false))
-				.addMapping(HpoEncodedValue.NORMAL,
-						HpoMockUtils.mockHpoTermWithNegation("HP:0011015", true))
-				.addMapping(HpoEncodedValue.HIGH, HpoMockUtils.mockHpoTermWithNegation("HP:0003074", false))
+				.addMapping(HpoEncodedValue.LOW, HYPOGLYCEMIA)
+				.addMapping(HpoEncodedValue.NORMAL, NOT_ABNORMAL_BLOOD_GLUCOSE)
+				.addMapping(HpoEncodedValue.HIGH, HYPERGLYCEMIA)
 				.build();
 
+	}
+	
+	@Test
+	public void testHpoTermsPopulated() {
+		assertTrue(annotation.getHpoTerms().contains(HYPOGLYCEMIA));
+		assertTrue(annotation.getHpoTerms().contains(NOT_ABNORMAL_BLOOD_GLUCOSE));
+		assertTrue(annotation.getHpoTerms().contains(HYPERGLYCEMIA));
 	}
 	
 	@Test
@@ -59,7 +70,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	public void testObservationWithAdditionalLoinc() throws LoincException {
 		HpoConversionResult result = annotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHighMultipleLoincs.json"));
 		assertTrue("The conversion was successful", result.hasSuccess());
-		assertEquals("The LoincId for the annotation is recorded", new LoincId("15074-8"), result.getLoincId());
+		assertEquals("The LoincId for the annotation is recorded", new LoincId(GLUCOSE_LOINC), result.getLoincId());
 	}
 	
 	@Test
@@ -67,10 +78,9 @@ public class DefaultLoinc2HpoAnnotationTest {
 		// Tie the annotation to the code "0-0"
 		LoincId loincId = new LoincId("0-0");
 		annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
-				.addMapping(HpoEncodedValue.LOW, HpoMockUtils.mockHpoTermWithNegation("HP:0001943", false))
-				.addMapping(HpoEncodedValue.NORMAL,
-						HpoMockUtils.mockHpoTermWithNegation("HP:0011015", true))
-				.addMapping(HpoEncodedValue.HIGH, HpoMockUtils.mockHpoTermWithNegation("HP:0003074", false))
+				.addMapping(HpoEncodedValue.LOW, HYPOGLYCEMIA)
+				.addMapping(HpoEncodedValue.NORMAL, NOT_ABNORMAL_BLOOD_GLUCOSE)
+				.addMapping(HpoEncodedValue.HIGH, HYPERGLYCEMIA)
 				.build();
 		
 		// Try to convert observation with the code 15074-8
@@ -86,7 +96,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 		assertTrue("The result succeeded", result.hasSuccess());
 		MethodConversionResult interpretationResult = result.getMethodResults().get("Interpretation");
 		HpoTermWithNegation term = interpretationResult.getTerm();
-		assertEquals("Expected code 'H' to be mapped to Hyperglycemia.", "HP:0003074", term.getHpoTermId().getIdWithPrefix());
+		assertEquals("Expected code 'H' to be mapped to Hyperglycemia.", HYPERGLYCEMIA.getHpoTermId(), term.getHpoTermId());
 		assertEquals("Expected Hyperglycemia not to be negated.", false, term.isNegated());
 		assertEquals("Term can also be retrieved from main result", result.getHpoTerms().iterator().next(), term);
 	}
@@ -104,11 +114,10 @@ public class DefaultLoinc2HpoAnnotationTest {
 	public void testUnmappedInterpretationCode() throws LoincException {
 
 		// The annotations do not provide a "High" mapping
-		LoincId loincId = new LoincId("15074-8");
+		LoincId loincId = new LoincId(GLUCOSE_LOINC);
 		annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
-				.addMapping(HpoEncodedValue.LOW, HpoMockUtils.mockHpoTermWithNegation("HP:0001943", false))
-				.addMapping(HpoEncodedValue.NORMAL,
-						HpoMockUtils.mockHpoTermWithNegation("HP:0011015", true))
+				.addMapping(HpoEncodedValue.LOW, HYPOGLYCEMIA)
+				.addMapping(HpoEncodedValue.NORMAL, NOT_ABNORMAL_BLOOD_GLUCOSE)
 				.build();
 		
 		HpoConversionResult result = annotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHigh.json"));

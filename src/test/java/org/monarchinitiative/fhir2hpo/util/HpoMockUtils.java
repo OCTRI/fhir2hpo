@@ -6,24 +6,13 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 public class HpoMockUtils {
 	
 	/**
-	 * Mock an HPO Term Id
-	 * @param idWithPrefix
-	 * @return
-	 */
-	public static TermId mockTermId(String idWithPrefix) {
-		// TermId is a final class and cannot be mocked with Mockito
-		TermId hpoTermId = TermId.constructWithPrefix(idWithPrefix);
-		return hpoTermId;
-	}
-	
-	/**
-	 * Mock an HpoTermWithNegation
-	 * @param idWithPrefix the answer to hpoTerm.getIdWithPrefix()
+	 * Get an HpoTermWithNegation
+	 * @param idWithPrefix the answer to term.getIdWithPrefix()
 	 * @param isNegated whether the term should be negated
 	 * @return
 	 */
-	public static HpoTermWithNegation mockHpoTermWithNegation(String idWithPrefix, boolean isNegated) {
-		return new HpoTermWithNegation(mockTermId(idWithPrefix), isNegated);
+	public static HpoTermWithNegation getHpoTermWithNegation(String idWithPrefix, boolean isNegated) {
+		return new HpoTermWithNegation(TermId.constructWithPrefix(idWithPrefix), isNegated);
 	}
 
 }
