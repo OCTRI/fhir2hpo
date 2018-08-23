@@ -9,7 +9,7 @@ import org.monarchinitiative.fhir2hpo.fhir.util.ObservationUtil;
 import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
 import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
-import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
+import org.monarchinitiative.fhir2hpo.loinc.exception.LoincCodeNotFoundException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincNotAnnotatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +21,8 @@ public class ObservationAnalysisService {
 	AnnotationService annotationService;
 
 	/**
-	 * Analyze the observation and return the result. While rare, more than one result is possible if the
-	 * observation has more than one LOINC code.
+	 * Analyze the observation and return the result. An observation may have multiple LOINC in both the code and component
+	 * sections, so multiple results are possible.
 	 * @param observation
 	 * @return
 	 */
@@ -30,13 +30,11 @@ public class ObservationAnalysisService {
 		
 		List<HpoConversionResult> results = new ArrayList<>();
 		
-		Set<LoincId> loincIds = null;
-		try {
-			loincIds = ObservationUtil.getLoincIdsOfObservation(observation);
-		} catch (LoincException e) {
+		Set<LoincId> loincIds = ObservationUtil.getAllLoincIdsOfObservation(observation);
+		if (loincIds.isEmpty()) {
 			// Error getting LOINCs from Observation. Add exception and return.
 			HpoConversionResult result = new HpoConversionResult(observation, null);
-			result.setException(e);
+			result.setException(new LoincCodeNotFoundException());
 			results.add(result);
 			return results;
 		}

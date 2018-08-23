@@ -11,7 +11,6 @@ import org.monarchinitiative.fhir2hpo.config.FhirConfiguration;
 import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 import org.monarchinitiative.fhir2hpo.hpo.MethodConversionResult;
-import org.monarchinitiative.fhir2hpo.loinc.exception.LoincCodeNotFoundException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.MismatchedLoincIdException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.MissingInterpretationException;
@@ -36,42 +35,55 @@ public class DefaultLoinc2HpoAnnotationTest {
 	private final static HpoTermWithNegation NOT_ABNORMAL_BLOOD_GLUCOSE = HpoMockUtils
 		.getHpoTermWithNegation("HP:0011015", true);
 	private final static HpoTermWithNegation HYPERGLYCEMIA = HpoMockUtils.getHpoTermWithNegation("HP:0003074", false);
+	private final static String BILIRUBIN_LOINC = "5770-3";
+	private final static HpoTermWithNegation BILIRUNIURIA = HpoMockUtils.getHpoTermWithNegation("HP:0031811", false);
+	private final static HpoTermWithNegation NOT_BILIRUNIURIA = HpoMockUtils
+		.getHpoTermWithNegation("HP:0031811", true);
 
 	@Autowired
 	FhirContext fhirContext;
 
-	private DefaultLoinc2HpoAnnotation annotation;
+	// An annotation for a quantitative LOINC
+	private DefaultLoinc2HpoAnnotation glucoseAnnotation;
+	// An annotation for an ordinal LOINC
+	private DefaultLoinc2HpoAnnotation bilirubinAnnotation;
 
 	@Before
 	public void setup() throws LoincException {
 
 		LoincId loincId = new LoincId(GLUCOSE_LOINC);
-		annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
+		glucoseAnnotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
 			.addMapping(HpoEncodedValue.LOW, HYPOGLYCEMIA)
 			.addMapping(HpoEncodedValue.NORMAL, NOT_ABNORMAL_BLOOD_GLUCOSE)
 			.addMapping(HpoEncodedValue.HIGH, HYPERGLYCEMIA)
+			.build();
+
+		loincId = new LoincId(BILIRUBIN_LOINC);
+		bilirubinAnnotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Ord)
+			.addMapping(new HpoEncodedValue(HpoEncodedValue.FHIR_SYSTEM, "POS"), BILIRUNIURIA)
+			.addMapping(new HpoEncodedValue(HpoEncodedValue.FHIR_SYSTEM, "NEG"), NOT_BILIRUNIURIA)
 			.build();
 
 	}
 
 	@Test
 	public void testHpoTermsPopulated() {
-		assertTrue(annotation.getHpoTerms().contains(HYPOGLYCEMIA));
-		assertTrue(annotation.getHpoTerms().contains(NOT_ABNORMAL_BLOOD_GLUCOSE));
-		assertTrue(annotation.getHpoTerms().contains(HYPERGLYCEMIA));
+		assertTrue(glucoseAnnotation.getHpoTerms().contains(HYPOGLYCEMIA));
+		assertTrue(glucoseAnnotation.getHpoTerms().contains(NOT_ABNORMAL_BLOOD_GLUCOSE));
+		assertTrue(glucoseAnnotation.getHpoTerms().contains(HYPERGLYCEMIA));
 	}
 
 	@Test
 	public void testObservationWithoutLoinc() {
-		HpoConversionResult result = annotation
+		HpoConversionResult result = glucoseAnnotation
 			.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/noLoinc.json"));
 		assertTrue("The result has an exception", result.hasException());
-		assertEquals("Should not be able to convert observation without LoincId", LoincCodeNotFoundException.class,
+		assertEquals("Should not be able to convert observation without LoincId", MismatchedLoincIdException.class,
 			result.getException().getClass());
 	}
 
 	public void testObservationWithAdditionalLoinc() throws LoincException {
-		HpoConversionResult result = annotation
+		HpoConversionResult result = glucoseAnnotation
 			.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHighMultipleLoincs.json"));
 		assertTrue("The conversion was successful", result.hasSuccess());
 		assertEquals("The LoincId for the annotation is recorded", new LoincId(GLUCOSE_LOINC), result.getLoincId());
@@ -81,14 +93,14 @@ public class DefaultLoinc2HpoAnnotationTest {
 	public void testMismatchedLoincId() throws LoincException {
 		// Tie the annotation to the code "0-0"
 		LoincId loincId = new LoincId("0-0");
-		annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
+		glucoseAnnotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
 			.addMapping(HpoEncodedValue.LOW, HYPOGLYCEMIA)
 			.addMapping(HpoEncodedValue.NORMAL, NOT_ABNORMAL_BLOOD_GLUCOSE)
 			.addMapping(HpoEncodedValue.HIGH, HYPERGLYCEMIA)
 			.build();
 
 		// Try to convert observation with the code 15074-8
-		HpoConversionResult result = annotation
+		HpoConversionResult result = glucoseAnnotation
 			.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHigh.json"));
 		assertTrue("The result has an exception", result.hasException());
 		assertEquals("Should not be able to convert with mismatched LoincId", MismatchedLoincIdException.class,
@@ -98,7 +110,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	@Test
 	public void testObservationWithInterpretation() {
 
-		HpoConversionResult result = annotation
+		HpoConversionResult result = glucoseAnnotation
 			.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHigh.json"));
 		assertTrue("The result succeeded", result.hasSuccess());
 		MethodConversionResult interpretationResult = result.getMethodResults().get("Interpretation");
@@ -112,7 +124,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	@Test
 	public void testObservationWithoutInterpretation() {
 
-		HpoConversionResult result = annotation.convert(
+		HpoConversionResult result = glucoseAnnotation.convert(
 			FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHighNoInterpretation.json"));
 		MethodConversionResult interpretationResult = result.getMethodResults().get("Interpretation");
 		assertTrue("The interpretation result has an exception", interpretationResult.hasException());
@@ -125,12 +137,12 @@ public class DefaultLoinc2HpoAnnotationTest {
 
 		// The annotations do not provide a "High" mapping
 		LoincId loincId = new LoincId(GLUCOSE_LOINC);
-		annotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
+		glucoseAnnotation = new DefaultLoinc2HpoAnnotation.Builder().setLoincId(loincId).setLoincScale(LoincScale.Qn)
 			.addMapping(HpoEncodedValue.LOW, HYPOGLYCEMIA)
 			.addMapping(HpoEncodedValue.NORMAL, NOT_ABNORMAL_BLOOD_GLUCOSE)
 			.build();
 
-		HpoConversionResult result = annotation
+		HpoConversionResult result = glucoseAnnotation
 			.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHigh.json"));
 		MethodConversionResult interpretationResult = result.getMethodResults().get("Interpretation");
 		assertTrue("The interpretation result has an exception", interpretationResult.hasException());
@@ -141,7 +153,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	@Test
 	public void testObservationWithValueQuantity() {
 
-		HpoConversionResult result = annotation
+		HpoConversionResult result = glucoseAnnotation
 			.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHigh.json"));
 		assertTrue("The result succeeded", result.hasSuccess());
 		MethodConversionResult valueQuantityResult = result.getMethodResults().get("ValueQuantity");
@@ -155,7 +167,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	@Test
 	public void testObservationWithNoValueQuantity() {
 
-		HpoConversionResult result = annotation.convert(
+		HpoConversionResult result = glucoseAnnotation.convert(
 			FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHighNoValueQuantity.json"));
 		MethodConversionResult valueQuantityResult = result.getMethodResults().get("ValueQuantity");
 		assertTrue("The value quantity result has an exception", valueQuantityResult.hasException());
@@ -166,7 +178,7 @@ public class DefaultLoinc2HpoAnnotationTest {
 	@Test
 	public void testObservationWithNoReferenceRange() {
 
-		HpoConversionResult result = annotation.convert(
+		HpoConversionResult result = glucoseAnnotation.convert(
 			FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHighNoReferenceRange.json"));
 		MethodConversionResult valueQuantityResult = result.getMethodResults().get("ValueQuantity");
 		assertTrue("The value quantity result has an exception", valueQuantityResult.hasException());
@@ -174,7 +186,55 @@ public class DefaultLoinc2HpoAnnotationTest {
 			valueQuantityResult.getException().getClass());
 	}
 
-	// TODO: May want other tests for these exceptions once we have a better understanding of expected formats
-	// AmbiguousReferenceRangeException
+	@Test
+	public void testObservationWithValueString() {
+		HpoConversionResult result = bilirubinAnnotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/bilirubinNegative.json"));
+		MethodConversionResult valueStringResult = result.getMethodResults().get("ValueString");
+		HpoTermWithNegation term = valueStringResult.getTerm();
+		assertEquals("Expected string 'Negative' to be mapped to Bilirubinuria.", "HP:0031811",
+			term.getHpoTermId().getIdWithPrefix());
+		assertEquals("Expected Bilirubinuria to be negated.", true, term.isNegated());
+		assertEquals("Term can also be retrieved from main result", result.getHpoTerms().iterator().next(), term);
+	}
+	
+	@Test
+	public void testObservationWithComponentInterpretation() {
+		HpoConversionResult result = glucoseAnnotation
+			.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHighComponentLoinc.json"));
+		assertTrue("The result succeeded", result.hasSuccess());
+		MethodConversionResult interpretationResult = result.getMethodResults().get("Interpretation");
+		HpoTermWithNegation term = interpretationResult.getTerm();
+		assertEquals("Expected code 'H' to be mapped to Hyperglycemia.", HYPERGLYCEMIA.getHpoTermId(),
+			term.getHpoTermId());
+		assertEquals("Expected Hyperglycemia not to be negated.", false, term.isNegated());
+		assertEquals("Term can also be retrieved from main result", result.getHpoTerms().iterator().next(), term);		
+	}
+	
+	@Test
+	public void testObservationWithComponentValueQuantity() {
+
+		HpoConversionResult result = glucoseAnnotation
+			.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/glucoseHighComponentLoinc.json"));
+		assertTrue("The result succeeded", result.hasSuccess());
+		MethodConversionResult valueQuantityResult = result.getMethodResults().get("ValueQuantity");
+		HpoTermWithNegation term = valueQuantityResult.getTerm();
+		assertEquals("Expected code 'H' to be mapped to Hyperglycemia.", "HP:0003074",
+			term.getHpoTermId().getIdWithPrefix());
+		assertEquals("Expected Hyperglycemia not to be negated.", false, term.isNegated());
+		assertEquals("Term can also be retrieved from main result", result.getHpoTerms().iterator().next(), term);
+	}
+
+	@Test
+	public void testObservationWithComponentValueString() {
+		HpoConversionResult result = bilirubinAnnotation.convert(FhirParseUtils.getObservation(fhirContext, "fhir/observation/bilirubinNegativeComponentLoinc.json"));
+		MethodConversionResult valueStringResult = result.getMethodResults().get("ValueString");
+		HpoTermWithNegation term = valueStringResult.getTerm();
+		assertEquals("Expected string 'Negative' to be mapped to Bilirubinuria.", "HP:0031811",
+			term.getHpoTermId().getIdWithPrefix());
+		assertEquals("Expected Bilirubinuria to be negated.", true, term.isNegated());
+		assertEquals("Term can also be retrieved from main result", result.getHpoTerms().iterator().next(), term);
+	}
+	
+
 
 }
