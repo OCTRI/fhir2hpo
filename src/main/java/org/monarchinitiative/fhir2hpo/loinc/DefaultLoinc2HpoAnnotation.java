@@ -4,21 +4,20 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Observation.ObservationComponentComponent;
 import org.hl7.fhir.dstu3.model.Observation.ObservationReferenceRangeComponent;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.monarchinitiative.fhir2hpo.codesystems.CodeContainer;
 import org.monarchinitiative.fhir2hpo.codesystems.CodeableConceptAnalyzer;
 import org.monarchinitiative.fhir2hpo.codesystems.HpoEncodedValue;
-import org.monarchinitiative.fhir2hpo.fhir.util.ObservationUtil;
-import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
+import org.monarchinitiative.fhir2hpo.fhir.util.ObservationLoincInfo;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
+import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.MethodConversionResult;
 import org.monarchinitiative.fhir2hpo.loinc.exception.AmbiguousReferenceRangeException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException;
@@ -130,84 +129,51 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	}
 
 	@Override
-	public HpoConversionResult convert(Observation observation) {
+	public LoincConversionResult convert(Observation observation) {
+		
+		LoincConversionResult result = new LoincConversionResult(null);
+		try {
+			
+			ObservationLoincInfo observationLoincInfo = new ObservationLoincInfo(loincId, observation);
+			result = new LoincConversionResult(observationLoincInfo);
+			
+			result.addMethodConversionResult(convertInterpretation(observationLoincInfo.getInterpretation()));
+			result.addMethodConversionResult(convertValueQuantity(observationLoincInfo.getValueQuantity(), observationLoincInfo.getReferenceRange()));
+			result.addMethodConversionResult(convertValueString(observationLoincInfo.getValueString()));
+			
+			// ValueCodeableConcept might apply to Ord LOINCs. However, in examples we've seen the concept
+			// is encoded using a different system (e.g., SNOMED) so we would need to represent annotations
+			// in an advanced way. See: https://www.hl7.org/fhir/observation-example-f206-staphylococcus.json
 
-		HpoConversionResult result = new HpoConversionResult(observation, loincId);
-		// Determine whether the LOINC is in the code or component section of the observation
-		Set<LoincId> codeLoincs = ObservationUtil.getCodeSectionLoincIdsOfObservation(observation);
-		Map<LoincId, ObservationComponentComponent> componentLoincs = ObservationUtil
-			.getComponentLoincIdsOfObservation(observation);
-		if (codeLoincs.contains(loincId)) {
-			result.addMethodConversionResult(
-				convertInterpretation(observation.hasInterpretation(), observation.getInterpretation()));
-			result.addMethodConversionResult(convertValueQuantity(observation.hasValueQuantity(),
-				ObservationUtil.getValueQuantityOfObservation(observation), observation.getReferenceRange()));
-			result.addMethodConversionResult(convertValueString(observation.hasValueStringType(),
-				ObservationUtil.getValueStringOfObservation(observation)));
-		} else if (componentLoincs.containsKey(loincId)) {
-			ObservationComponentComponent component = componentLoincs.get(loincId);
-			result.addMethodConversionResult(
-				convertInterpretation(component.hasInterpretation(), component.getInterpretation()));
-			result.addMethodConversionResult(convertValueQuantity(component.hasValueQuantity(),
-				ObservationUtil.getValueQuantityOfObservationComponent(component), component.getReferenceRange()));
-			result.addMethodConversionResult(convertValueString(component.hasValueStringType(),
-				ObservationUtil.getValueStringOfObservationComponent(component)));
-		} else {
-			result.setException(
-				new MismatchedLoincIdException("Can only convert observations with LoincId " + loincId));
+		} catch (MismatchedLoincIdException e) {
+			result.setException(e);
 		}
-
-		// ValueCodeableConcept might apply to Ord LOINCs. However, in examples we've seen the concept
-		// is encoded using a different system (e.g., SNOMED) so we would need to represent annotations
-		// in an advanced way. See: https://www.hl7.org/fhir/observation-example-f206-staphylococcus.json
 
 		return result;
 	}
 
-	/**
-	 * Try to convert the interpretation if one exists
-	 * 
-	 * @param hasInterpretation
-	 *            whether the interpretation exists
-	 * @param interpretation
-	 *            the interpretation or a blank CodeableConcept if none exists
-	 * @return the result of the attempted conversion
-	 */
-	private MethodConversionResult convertInterpretation(Boolean hasInterpretation, CodeableConcept interpretation) {
+	private MethodConversionResult convertInterpretation(Optional<CodeableConcept> interpretation) {
 		MethodConversionResult result = new MethodConversionResult("Interpretation");
 		try {
-			if (hasInterpretation) {
+			if (interpretation.isPresent()) {
 				HpoEncodedValue internalCode = CodeableConceptAnalyzer
-					.getInternalCodeForCodeableConcept(interpretation);
-				result.succeed(getHpoTermForInternalCode(internalCode));
+					.getInternalCodeForCodeableConcept(interpretation.get());
+				result.succeed(getHpoTermForInternalCode(internalCode));				
 			} else {
 				throw new MissingInterpretationException();
 			}
 		} catch (ConversionException e) {
 			result.fail(e);
 		}
-
+		
 		return result;
-
 	}
 
-	/**
-	 * Try to convert the ValueQuantity if one exists.
-	 * 
-	 * @param hasValueQuantity
-	 *            whether a valueQuantity was found
-	 * @param the
-	 *            valueQuantity or null if one doesn't exists
-	 * @param the
-	 *            reference range or an empty list if it doesn't exist
-	 * @return the result of the attempted conversion
-	 */
-	private MethodConversionResult convertValueQuantity(Boolean hasValueQuantity, Quantity valueQuantity,
-		List<ObservationReferenceRangeComponent> referenceRange) {
+	private MethodConversionResult convertValueQuantity(Optional<Quantity> valueQuantity, Optional<List<ObservationReferenceRangeComponent>> referenceRange) {
 		MethodConversionResult result = new MethodConversionResult("ValueQuantity");
 		try {
-			if (hasValueQuantity) {
-				HpoTermWithNegation hpoTerm = getHpoTermForValueQuantity(valueQuantity,
+			if (valueQuantity.isPresent()) {
+				HpoTermWithNegation hpoTerm = getHpoTermForValueQuantity(valueQuantity.get(),
 					referenceRange);
 				result.succeed(hpoTerm);
 			} else {
@@ -218,21 +184,14 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		}
 		return result;
 	}
-
-	/**
-	 * Try to convert the ValueString if one exists.
-	 * 
-	 * @param hasValueString whether a valueString was found
-	 * @param valueString the valueString or null if it does not exist
-	 * @return the result of the attempted conversion
-	 */
-	private MethodConversionResult convertValueString(Boolean hasValueString, String valueString) {
+	
+	private MethodConversionResult convertValueString(Optional<String> valueString) {
 		MethodConversionResult result = new MethodConversionResult("ValueString");
 		try {
-			if (hasValueString && valueString != null) {
+			if (valueString.isPresent()) {
 				// Normalize the value string and create a Coding to check against the CodeContainer mapping
 				Coding coding = new Coding(CodeContainer.CODING_VALUE_STRING,
-					valueString.toLowerCase().trim(),
+					valueString.get().toLowerCase().trim(),
 					CodeContainer.CODING_VALUE_STRING);
 				HpoEncodedValue internalCode = CodeContainer.getInternalCode(coding);
 				if (internalCode == null) {
@@ -249,6 +208,8 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		}
 		return result;
 	}
+
+
 
 	/**
 	 * Given an HpoEncodedValue, returns the corresponding HpoTerm or throws an exception.
@@ -276,11 +237,11 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	 * @throws ConversionException
 	 */
 	private HpoTermWithNegation getHpoTermForValueQuantity(Quantity valueQuantity,
-		List<ObservationReferenceRangeComponent> referenceRange)
+		Optional<List<ObservationReferenceRangeComponent>> referenceRange)
 		throws ConversionException {
-		if (referenceRange.size() < 1) {
+		if (!referenceRange.isPresent()) {
 			throw new ReferenceRangeNotFoundException();
-		} else if (referenceRange.size() > 1) {
+		} else if (referenceRange.get().size() > 1) {
 			// TODO: It can happen when there is actually one range but coded in three ranges
 			// e.g. normal 20-30
 			// in this case, one range ([20, 30]) is sufficient;
@@ -289,7 +250,7 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 			throw new AmbiguousReferenceRangeException();
 		}
 
-		ObservationReferenceRangeComponent targetReference = referenceRange.get(0);
+		ObservationReferenceRangeComponent targetReference = referenceRange.get().get(0);
 		double low = targetReference.hasLow() ? targetReference.getLow().getValue().doubleValue() : Double.MIN_VALUE;
 		double high = targetReference.hasHigh() ? targetReference.getHigh().getValue().doubleValue() : Double.MAX_VALUE;
 		double observed = valueQuantity.getValue().doubleValue();

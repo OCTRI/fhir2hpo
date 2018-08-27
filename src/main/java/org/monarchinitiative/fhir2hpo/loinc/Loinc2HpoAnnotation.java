@@ -3,7 +3,7 @@ package org.monarchinitiative.fhir2hpo.loinc;
 import java.util.Collection;
 
 import org.hl7.fhir.dstu3.model.Observation;
-import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
+import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 
 /**
@@ -38,6 +38,6 @@ public interface Loinc2HpoAnnotation {
      * @param observation
      * @return
      */
-    public HpoConversionResult convert(Observation observation);
+    public LoincConversionResult convert(Observation observation);
 
 }

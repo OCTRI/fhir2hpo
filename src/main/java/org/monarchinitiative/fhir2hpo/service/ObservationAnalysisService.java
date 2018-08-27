@@ -1,15 +1,13 @@
 package org.monarchinitiative.fhir2hpo.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.dstu3.model.Observation;
 import org.monarchinitiative.fhir2hpo.fhir.util.ObservationUtil;
-import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
+import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
+import org.monarchinitiative.fhir2hpo.hpo.ObservationConversionResult;
 import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
-import org.monarchinitiative.fhir2hpo.loinc.exception.LoincCodeNotFoundException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincNotAnnotatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,36 +19,27 @@ public class ObservationAnalysisService {
 	AnnotationService annotationService;
 
 	/**
-	 * Analyze the observation and return the result. An observation may have multiple LOINC in both the code and component
-	 * sections, so multiple results are possible.
+	 * Analyze the observation and return the result.
 	 * @param observation
-	 * @return
+	 * @return the result encompassing any LOINCs encountered in the observation
 	 */
-	public List<HpoConversionResult> analyzeObservation(Observation observation) {
+	public ObservationConversionResult analyzeObservation(Observation observation) {
 		
-		List<HpoConversionResult> results = new ArrayList<>();
+		ObservationConversionResult result = new ObservationConversionResult(observation);
 		
 		Set<LoincId> loincIds = ObservationUtil.getAllLoincIdsOfObservation(observation);
-		if (loincIds.isEmpty()) {
-			// Error getting LOINCs from Observation. Add exception and return.
-			HpoConversionResult result = new HpoConversionResult(observation, null);
-			result.setException(new LoincCodeNotFoundException());
-			results.add(result);
-			return results;
-		}
-		
 		for (LoincId loincId : loincIds) {
-			HpoConversionResult result = new HpoConversionResult(observation, loincId);
+			LoincConversionResult loincResult = new LoincConversionResult(null);
 			try {
 				Loinc2HpoAnnotation annotation = annotationService.getAnnotations(loincId);
-				result = annotation.convert(observation);
+				loincResult = annotation.convert(observation);
 			} catch (LoincNotAnnotatedException e) {
-				result.setException(e);
+				loincResult.setException(e);
 			}
-			results.add(result);
+			result.addLoincConversionResult(loincResult);
 		}
 			
-		return results;
+		return result;
 	}
 
 }

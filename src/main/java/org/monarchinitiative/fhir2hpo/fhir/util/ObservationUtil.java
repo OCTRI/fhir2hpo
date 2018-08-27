@@ -3,15 +3,13 @@ package org.monarchinitiative.fhir2hpo.fhir.util;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationComponentComponent;
-import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 
@@ -48,85 +46,15 @@ public class ObservationUtil {
 			componentLoincs.stream().forEach(loinc -> loincs.put(loinc, component));
 		}
 		return loincs;
-	}
+	}	
 	
-	/**
-	 * This helper will return a null ValueQuantity instead of throwing an exception when one doesn't exist
-	 * @param observation
-	 * @return
-	 */
-	public static Quantity getValueQuantityOfObservation(Observation observation) {
-		Quantity valueQuantity = null;
-		try {
-			valueQuantity = observation.getValueQuantity();
-		} catch (FHIRException e) {
-			// Leave valueQuantity null
-		}
-		
-		return valueQuantity;
-	}
-
-	/**
-	 * This helper will return a null ValueQuantity instead of throwing an exception when one doesn't exist
-	 * @param component
-	 * @return
-	 */
-	public static Quantity getValueQuantityOfObservationComponent(ObservationComponentComponent component) {
-		Quantity valueQuantity = null;
-		try {
-			valueQuantity = component.getValueQuantity();
-		} catch (FHIRException e) {
-			// Leave valueQuantity null
-		}
-		
-		return valueQuantity;
-	}
-
-	/**
-	 * This helper will return a null String instead of throwing an exception when a value is not a ValueString
-	 * @param observation
-	 * @return
-	 */
-	public static String getValueStringOfObservation(Observation observation) {
-		String valueString = null;
-		try {
-			StringType valueStringType = observation.getValueStringType();
-			if (valueStringType != null) {
-				valueString = valueStringType.asStringValue();
-			}
-		} catch (FHIRException e) {
-			// Leave valueString null
-		}
-		
-		return valueString;
-	}
-
-	/**
-	 * This helper will return a null String instead of throwing an exception when a value is not a ValueString
-	 * @param component
-	 * @return
-	 */
-	public static String getValueStringOfObservationComponent(ObservationComponentComponent component) {
-		String valueString = null;
-		try {
-			StringType valueStringType = component.getValueStringType();
-			if (valueStringType != null) {
-				valueString = valueStringType.asStringValue();
-			}
-		} catch (FHIRException e) {
-			// Leave valueString null
-		}
-		
-		return valueString;
-	}
-
 	/**
 	 * For a codeable concept, get any LOINC Ids associated
 	 * @param codeableConcept
 	 * @return
 	 * @throws LoincException 
 	 */
-	private static Set<LoincId> getLoincIdsOfCodeableConcept(CodeableConcept codeableConcept) {
+	public static Set<LoincId> getLoincIdsOfCodeableConcept(CodeableConcept codeableConcept) {
 		Set<LoincId> loincIds = new HashSet<>();
 		for (Coding coding : codeableConcept.getCoding()) {
 			if (coding.getSystem() != null && coding.getSystem().equals(LOINC_SYSTEM)) {
@@ -138,6 +66,29 @@ public class ObservationUtil {
 			}
 		}
 		return loincIds;
+	}
+	
+	/**
+	 * Given a CodeableConcept, try to extract a description. Text is preferred, but if not
+	 * found, look through codings.
+	 * @param codeableConcept
+	 * @return return a description of the CodeableConcept or null if not found.
+	 */
+	public static String getDescriptionOfCodeableConcept(CodeableConcept codeableConcept) {
+		
+		if (codeableConcept.hasText()) {
+			return codeableConcept.getText();
+		}
+		if (codeableConcept.hasCoding()) {			
+			// Get the first coding with a display
+			Optional<Coding> codingWithDisplay = codeableConcept.getCoding().stream().filter(coding -> coding.getDisplay() != null).findFirst();
+			if (codingWithDisplay.isPresent()) {
+				return codingWithDisplay.get().getDisplay();
+			}			
+		}
+		
+		return null;
+		
 	}
 
 }
