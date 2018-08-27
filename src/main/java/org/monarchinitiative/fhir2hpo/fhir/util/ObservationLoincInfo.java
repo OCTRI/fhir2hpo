@@ -1,7 +1,5 @@
 package org.monarchinitiative.fhir2hpo.fhir.util;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,49 +77,53 @@ public class ObservationLoincInfo {
 	}
 	
 	/**
-	 * These fields may come from the Observation or the ObservationComponentComponent depending
-	 * on where the LOINC of interest lives.
+	 * Call getters on either the Observation or the ObservationComponentComponent depending
+	 * on where the LOINC of interest lives. Set fields of interest.
 	 * @param the observation or the component of it relevant to the LOINC
 	 */
 	private void setFieldsWithReflection(Object o) {
 		Class<? extends Object> clazz = o.getClass();
 		try {
-			Method getCode = clazz.getDeclaredMethod("getCode");
-			CodeableConcept code = (CodeableConcept) getCode.invoke(o);
+			
+			// Call getCode() on the object and try to extract a description, falling back on the LOINC if one is not found
+			CodeableConcept code = (CodeableConcept) clazz.getDeclaredMethod("getCode").invoke(o);
 			description = ObservationUtil.getDescriptionOfCodeableConcept(code);
 			if (description == null) {
 				description = loincId.toString();
 			}
+			
+			// Call hasInterpretation(). If true, set the Optional interpretation field
 			if ((boolean) clazz.getDeclaredMethod("hasInterpretation").invoke(o)) {
 				interpretation = Optional.of((CodeableConcept) clazz.getDeclaredMethod("getInterpretation").invoke(o));
 			}
 			
+			// Call getValue(). If value exists, set the Optional ValueQuantity and ValueString fields. Other Types are ignored.
 			Type value = (Type) clazz.getDeclaredMethod("getValue").invoke(o);
 			if (value != null) {
-				try {
-					if (value instanceof Quantity) {
-						valueQuantity = Optional.of((Quantity) clazz.getDeclaredMethod("getValueQuantity").invoke(o));
-						valueDescription = valueQuantity.get().getValue() + " " + valueQuantity.get().getUnit();
-					} else if (value instanceof StringType) {
-						StringType stringType = (StringType) clazz.getDeclaredMethod("getValueStringType").invoke(o);
-						if (stringType != null) {
-							valueString = Optional.of(stringType.asStringValue());
-							valueDescription = valueString.get();
-						}
-					} // No other value types supported
-				} catch (Exception e) {
-					// Ignore - the getters throw a FHIRException if there is no value
-				}
+				if (value instanceof Quantity) {
+					Quantity quantity = (Quantity) clazz.getDeclaredMethod("getValueQuantity").invoke(o);
+					valueQuantity = Optional.of(quantity);
+					valueDescription = valueQuantity.get().getValue() + " " + valueQuantity.get().getUnit();
+				} else if (value instanceof StringType) {
+					StringType stringType = (StringType) clazz.getDeclaredMethod("getValueStringType").invoke(o);
+					valueString = Optional.of(stringType.asStringValue());
+					valueDescription = valueString.get();
+				} 
+				// No other value types supported
 			}
 			
+			// Call hasReferenceRange(). If true, set the Optional reference range field
 			if ((boolean) clazz.getDeclaredMethod("hasReferenceRange").invoke(o)) {
 				referenceRange = Optional.of((List<ObservationReferenceRangeComponent>) clazz.getDeclaredMethod("getReferenceRange").invoke(o));
 			}
-		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			
+		} catch (Exception e) {
+			// Some of the invoked methods can throw exceptions. They shouldn't, but just in case we catch
+			// all general exceptions here
 			e.printStackTrace();
 		}
 	}
-
+	
 	/**
 	 * Get the identifier of the original observation
 	 * @return
