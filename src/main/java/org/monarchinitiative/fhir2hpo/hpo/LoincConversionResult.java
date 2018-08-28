@@ -5,38 +5,36 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.dstu3.model.Observation;
+import org.monarchinitiative.fhir2hpo.fhir.util.ObservationLoincInfo;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 
 /**
- * This encapsulates the result of attempting to convert an observation to an HPO Term. This includes
- * the original observation and the results of each method tried.
+ * This encapsulates the result of attempting to convert a LOINC to an HPO Term. This includes
+ * the observation information specific to the LOINC and the results of each method tried.
  * 
  * @author yateam
  *
  */
-public class HpoConversionResult {
+public class LoincConversionResult {
 
-	final Observation observation;
-	final LoincId loincId;
+	final ObservationLoincInfo observationLoincInfo;
 
 	Exception exception; // An exception may be thrown before any methods have been tried
 
 	// A map from the method description to the specific result for that method.
 	Map<String, MethodConversionResult> methods = new HashMap<>();
 
-	public HpoConversionResult(Observation observation, LoincId loincId) {
-		this.observation = observation;
-		this.loincId = loincId;
+	public LoincConversionResult(ObservationLoincInfo observationLoincInfo) {
+		this.observationLoincInfo = observationLoincInfo;
 	}
 
 	/**
-	 * Get the original observation
+	 * Get the observation information specific to the LOINC
 	 * 
-	 * @return
+	 * @return the relevant observation information for the LOINC
 	 */
-	public Observation getObservation() {
-		return observation;
+	public ObservationLoincInfo getObservationLoincInfo() {
+		return observationLoincInfo;
 	}
 
 	/**
@@ -46,7 +44,7 @@ public class HpoConversionResult {
 	 * @return the relevant loincId for this result or null if none exists.
 	 */
 	public LoincId getLoincId() {
-		return loincId;
+		return observationLoincInfo.getLoincId();
 	}
 
 	/**

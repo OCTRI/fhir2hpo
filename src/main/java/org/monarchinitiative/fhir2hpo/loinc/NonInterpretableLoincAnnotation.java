@@ -5,8 +5,8 @@ import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.dstu3.model.Observation;
-import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
+import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
 import org.monarchinitiative.fhir2hpo.loinc.exception.NonInterpretableLoincException;
 
 /**
@@ -46,8 +46,8 @@ public class NonInterpretableLoincAnnotation implements Loinc2HpoAnnotation {
 	}
 
 	@Override
-	public HpoConversionResult convert(Observation observation) {
-		HpoConversionResult result = new HpoConversionResult(observation, loincId);
+	public LoincConversionResult convert(Observation observation) {
+		LoincConversionResult result = new LoincConversionResult(null);
 		result.setException(new NonInterpretableLoincException(reason));
 		return result;
 	}

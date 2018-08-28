@@ -1,0 +1,59 @@
+{
+	"resourceType": "Observation",
+	"id": "smart-495-lab",
+	"meta": {
+		"versionId": "2",
+		"lastUpdated": "2018-04-25T02:56:15.698-04:00",
+		"tag": [{
+			"system": "https://smarthealthit.org/tags",
+			"code": "smart-7-2017"
+		}]
+	},
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">2004-09-16: Bilirub Ur Ql Strip = Negative </div>"
+	},
+	"identifier": [{
+		"use": "official",
+		"system": "http://www.bmc.nl/zorgportal/identifiers/observations",
+		"value": "smart-495-lab"
+	}],
+	"status": "unknown",
+	"category": [{
+		"coding": [{
+			"system": "http://hl7.org/fhir/observation-category",
+			"code": "laboratory",
+			"display": "Laboratory"
+		}],
+		"text": "Laboratory"
+	}],
+	"code": {
+		"coding": [{
+			"system": "http://loinc.org",
+			"code": "24357-6",
+			"display": "UA Dipstick Pnl Ur"
+		}],
+		"text": "UA Dipstick Pnl Ur"
+	},
+	"subject": {
+		"reference": "Patient/smart-1627321"
+	},
+	"effectiveDateTime": "2004-09-16",
+	"performer": [{
+		"reference": "Practitioner/smart-Practitioner-71614502"
+	}],
+	"component": [
+		{
+			"code": {
+				"coding": [
+					{
+						"system": "http://loinc.org",
+						"code": "5770-3",
+						"display": "Bilirub Ur Ql Strip"
+					}
+				]
+			},
+			"valueString": "Negative"
+		}
+	]
+}
