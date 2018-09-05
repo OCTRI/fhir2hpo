@@ -1,14 +1,17 @@
 package org.monarchinitiative.fhir2hpo.fhir.util;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationComponentComponent;
 import org.hl7.fhir.dstu3.model.Observation.ObservationReferenceRangeComponent;
+import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
@@ -25,12 +28,11 @@ import org.monarchinitiative.fhir2hpo.loinc.exception.MismatchedLoincIdException
  */
 public class ObservationLoincInfo {
 
-	private static final Logger logger = LogManager.getLogger();
-
 	private String fhirId;
 	private LoincId loincId;
 	private String description;
-	private String date;
+	private Optional<Date> startDate = Optional.empty();
+	private Optional<Date> endDate = Optional.empty();
 	private String valueDescription;
 	private Optional<CodeableConcept> interpretation = Optional.empty();
 	private Optional<Quantity> valueQuantity = Optional.empty();
@@ -41,7 +43,7 @@ public class ObservationLoincInfo {
 		
 		this.fhirId = observation.getIdElement().getIdPart();
 		this.loincId = loincId;
-		this.date = getDateString(observation);
+		setDate(observation);
 		boolean containsLoinc = false;
 		if (ObservationUtil.getCodeSectionLoincIdsOfObservation(observation).contains(loincId)) {
 			containsLoinc = true;
@@ -61,19 +63,28 @@ public class ObservationLoincInfo {
 		}
 	}
 
-	private String getDateString(Observation observation) {
-		// TODO: Handle effective period or NPEs?
+	private void setDate(Observation observation) {
 		try {
-			if (observation.hasEffectiveDateTimeType()) {
-				return observation.getEffectiveDateTimeType().asStringValue();
+			if (observation.hasEffective()) {
+				Type effective = observation.getEffective();
+				if (effective instanceof DateTimeType) {
+					// Set start and end date to the same
+					startDate = Optional.of(observation.getEffectiveDateTimeType().getValue());
+					endDate = startDate;
+				} else if (effective instanceof Period) {
+					Period period = observation.getEffectivePeriod();
+					if (period.hasStart()) {
+						startDate = Optional.of(period.getStart());
+					}
+					if (period.hasEnd()) {
+						endDate = Optional.of(period.getEnd());
+					}
+				}
 			}
 		} catch (FHIRException e) {
 			// This should not occur since we check existence before getting
 			e.printStackTrace();
 		}
-
-		logger.warn("Could not find a date for the observation.");
-		return "";
 	}
 	
 	/**
@@ -149,11 +160,19 @@ public class ObservationLoincInfo {
 	}
 
 	/**
-	 * Get the effective date of the observation as a String
+	 * Get the start date
 	 * @return
 	 */
-	public String getDate() {
-		return date;
+	public Optional<Date> getStartDate() {
+		return startDate;
+	}
+
+	/**
+	 * Get the end date
+	 * @return
+	 */
+	public Optional<Date> getEndDate() {
+		return endDate;
 	}
 
 	/**
