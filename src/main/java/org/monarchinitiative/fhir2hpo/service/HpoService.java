@@ -1,5 +1,6 @@
 package org.monarchinitiative.fhir2hpo.service;
 
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -29,9 +30,8 @@ public class HpoService {
   
   public HpoService() throws URISyntaxException, PhenolException {
     // Load the HPO
-    URL url = getClass().getClassLoader().getResource("hp.obo");
-    Path p = Paths.get(url.toURI());
-    HpOboParser hpoOboParser = new HpOboParser(p.toFile());
+    InputStream obo = getClass().getClassLoader().getResourceAsStream("hp.obo");
+    HpOboParser hpoOboParser = new HpOboParser(obo);
     HpoOntology ontology = hpoOboParser.parse();
 
     ImmutableMap.Builder<TermId, Term> termmapBuilder = new ImmutableMap.Builder<>();
