@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -265,12 +264,23 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 		return getHpoTermForInternalCode(result);
 	}
 
+	/**
+	 * This is a JSON Array representing all the mappings so they can be displayed in a normalized way
+	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(loincId.toString() + ": {");
-		sb.append(codeToHpoTerm.entrySet().stream().map(set -> set.toString()).collect(Collectors.joining(",")));
-		sb.append("}");
+		sb.append("{\"mappings\": [");
+		for (HpoEncodedValue key : codeToHpoTerm.keySet()) {
+			sb.append("{\"code\": \"" + key.getCoding().getCode() + "\", \"termNegated\": \"");
+			HpoTermWithNegation term = codeToHpoTerm.get(key);
+			sb.append(term.isNegated() + "\", \"termPrefix\": \"");
+			sb.append(term.getHpoTermId().getPrefix().getValue() + "\", \"termId\": \"");
+			sb.append(term.getHpoTermId().getId());
+			sb.append("\"},");
+		}
+		sb.deleteCharAt(sb.length()-1);
+		sb.append("]}");
 		return sb.toString();
 	}
 

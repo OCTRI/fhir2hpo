@@ -22,6 +22,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<hapi.fhir.version>3.4.0</hapi.fhir.version>
 		<phenol.version>1.2.2</phenol.version>
 	</properties>
 
@@ -71,7 +72,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>3.4.0</version>
+			<version>${hapi.fhir.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -82,7 +83,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>3.4.0</version>
+			<version>${hapi.fhir.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-io</groupId>
