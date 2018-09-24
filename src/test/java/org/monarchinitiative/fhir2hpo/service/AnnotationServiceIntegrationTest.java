@@ -1,14 +1,12 @@
 package org.monarchinitiative.fhir2hpo.service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.monarchinitiative.fhir2hpo.loinc.DefaultLoinc2HpoAnnotation;
@@ -37,23 +35,10 @@ public class AnnotationServiceIntegrationTest {
 	@Autowired
 	HpoService hpoService;
 	
+	@Ignore
 	@Test
 	public void reportLoincs() throws LoincException, IOException {
 		
-		List<LoincId> list = new ArrayList<>();
-
-//		//Use Richard's list of LOINCs for EDS patients. Provide a spreadsheet that reports A, N, H, L
-//		ClassLoader classLoader = this.getClass().getClassLoader();
-//		InputStream stream = classLoader.getResourceAsStream("eds-labs.csv");
-//		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-//		String line = reader.readLine();
-//		while (line != null) {
-//			String[] elements = line.split(",");
-//			String l = elements[1];
-//			LoincId loincId = new LoincId(l);
-//			list.add(loincId);
-//			line = reader.readLine();
-//		};
 		Map<LoincId, Loinc2HpoAnnotation> annotationMap = annotationService.getAnnotationsMap();
 		System.out.println("LOINC, Interpretation, Negated, HPO Term Id, HPO Term Description");
 		
@@ -71,9 +56,6 @@ public class AnnotationServiceIntegrationTest {
 				//Move on to the next
 			}
 		}
-		
-		//reader.close();
-		//stream.close();
 		
 	}
 
