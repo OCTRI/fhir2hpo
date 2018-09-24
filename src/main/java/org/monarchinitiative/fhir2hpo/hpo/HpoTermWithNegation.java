@@ -50,4 +50,8 @@ public class HpoTermWithNegation {
 		return hpoTermId.getId().equals(other.getHpoTermId().getId());
 	}
 	
+	public String toString() {
+		return (isNegated ? "EXCLUDED: ":"") + hpoTermId.getIdWithPrefix();
+	}
+	
 }

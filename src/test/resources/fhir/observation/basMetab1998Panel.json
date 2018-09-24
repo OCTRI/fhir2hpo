@@ -41,7 +41,7 @@
 		"text": "Bas Metab Panel with Annotated Components"
 	},
 	"subject": {
-		"reference": "Patient/SMART-1627321"
+		"reference": "Patient/smart-1627321"
 	},
 	"effectiveDateTime": "2012-09-17",
 	"performer": [

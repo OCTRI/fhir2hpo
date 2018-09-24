@@ -17,10 +17,12 @@ public class ObservationConversionResult {
 	
 	private Observation observation;
 	private List<LoincConversionResult> loincConversionResults;
+	private List<AugmentedConversionResult> augmentedConversionResults;
 	
 	public ObservationConversionResult(Observation observation) {
 		this.observation = observation;
 		this.loincConversionResults = new ArrayList<>();
+		this.augmentedConversionResults = new ArrayList<>();
 	}
 	
 	public Observation getObservation() {
@@ -33,6 +35,14 @@ public class ObservationConversionResult {
 	
 	public List<LoincConversionResult> getLoincConversionResults() {
 		return loincConversionResults;
+	}
+	
+	public void addAugmentedConversionResult(AugmentedConversionResult augmentedConversionResult) {
+		augmentedConversionResults.add(augmentedConversionResult);
+	}
+	
+	public List<AugmentedConversionResult> getAugmentedConversionResults() {
+		return augmentedConversionResults;
 	}
 	
 }
