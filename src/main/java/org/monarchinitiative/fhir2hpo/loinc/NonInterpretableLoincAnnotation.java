@@ -47,7 +47,7 @@ public class NonInterpretableLoincAnnotation implements Loinc2HpoAnnotation {
 
 	@Override
 	public LoincConversionResult convert(Observation observation) {
-		LoincConversionResult result = new LoincConversionResult(null);
+		LoincConversionResult result = new LoincConversionResult(loincId);
 		result.setException(new NonInterpretableLoincException(reason));
 		return result;
 	}
