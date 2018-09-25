@@ -131,11 +131,11 @@ public class DefaultLoinc2HpoAnnotation implements Loinc2HpoAnnotation {
 	@Override
 	public LoincConversionResult convert(Observation observation) {
 		
-		LoincConversionResult result = new LoincConversionResult(null);
+		LoincConversionResult result = new LoincConversionResult(loincId);
 		try {
 			
 			ObservationLoincInfo observationLoincInfo = new ObservationLoincInfo(loincId, observation);
-			result = new LoincConversionResult(observationLoincInfo);
+			result.setObservationLoincInfo(observationLoincInfo);
 			
 			result.addMethodConversionResult(convertInterpretation(observationLoincInfo.getInterpretation()));
 			result.addMethodConversionResult(convertValueQuantity(observationLoincInfo.getValueQuantity(), observationLoincInfo.getReferenceRange()));

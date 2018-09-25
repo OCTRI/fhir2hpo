@@ -4,15 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.jexl3.JexlBuilder;
-import org.apache.commons.jexl3.JexlContext;
-import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.jexl3.JexlScript;
-import org.apache.commons.jexl3.MapContext;
 import org.hl7.fhir.dstu3.model.Observation;
-import org.monarchinitiative.fhir2hpo.fhir.util.ObservationLoincInfo;
 import org.monarchinitiative.fhir2hpo.fhir.util.ObservationUtil;
-import org.monarchinitiative.fhir2hpo.hpo.AugmentationRules;
 import org.monarchinitiative.fhir2hpo.hpo.AugmentedConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
@@ -20,7 +13,6 @@ import org.monarchinitiative.fhir2hpo.hpo.ObservationConversionResult;
 import org.monarchinitiative.fhir2hpo.loinc.Loinc2HpoAnnotation;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincNotAnnotatedException;
-import org.monarchinitiative.fhir2hpo.loinc.exception.MismatchedLoincIdException;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,14 +44,8 @@ public class ObservationAnalysisService {
 				Loinc2HpoAnnotation annotation = annotationService.getAnnotations(loincId);
 				loincResult = annotation.convert(observation);
 			} catch (LoincNotAnnotatedException e) {
-				try {
-					// Save the ObservationLoincInfo and set an exception on the result
-					ObservationLoincInfo loincInfo = new ObservationLoincInfo(loincId, observation);
-					loincResult = new LoincConversionResult(loincInfo);
-					loincResult.setException(e);
-				} catch (MismatchedLoincIdException ex) {
-					// We've already established that the Observation contains the LOINC, so this can't happen
-				}
+				loincResult = new LoincConversionResult(loincId);
+				loincResult.setException(e);
 			}
 			result.addLoincConversionResult(loincResult);
 		}

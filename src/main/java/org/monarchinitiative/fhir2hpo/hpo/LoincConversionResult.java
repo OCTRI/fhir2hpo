@@ -10,41 +10,52 @@ import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 
 /**
  * This encapsulates the result of attempting to convert a LOINC to an HPO Term. This includes
- * the observation information specific to the LOINC and the results of each method tried.
+ * the observation information specific to the LOINC and the results of each method tried. 
  * 
  * @author yateam
  *
  */
 public class LoincConversionResult {
 
-	final ObservationLoincInfo observationLoincInfo;
-
-	Exception exception; // An exception may be thrown before any methods have been tried
+	private final LoincId loincId;
+	private ObservationLoincInfo observationLoincInfo;
+	
+	// An exception may be thrown before any methods have been tried
+	Exception exception; 
 
 	// A map from the method description to the specific result for that method.
 	Map<String, MethodConversionResult> methods = new HashMap<>();
 
-	public LoincConversionResult(ObservationLoincInfo observationLoincInfo) {
+	public LoincConversionResult(LoincId loincId) {
+		this.loincId = loincId;
+	}
+	
+	/**
+	 * Set the observation information specific to the LOINC.
+	 * @param observationLoincInfo
+	 */
+	public void setObservationLoincInfo(ObservationLoincInfo observationLoincInfo) {
 		this.observationLoincInfo = observationLoincInfo;
 	}
 
 	/**
 	 * Get the observation information specific to the LOINC
 	 * 
-	 * @return the relevant observation information for the LOINC
+	 * @return the relevant observation information for the LOINC. This may be null if an exception is thrown
+	 * before it can be set.
 	 */
 	public ObservationLoincInfo getObservationLoincInfo() {
 		return observationLoincInfo;
 	}
 
 	/**
-	 * Get the relevant loincId for this result from the observation. Some observations may have more
-	 * than one LoincId, yielding multiple conversion results.
+	 * Get the relevant loincId for this result. Some observations may have more than one LoincId, yielding 
+	 * multiple conversion results.
 	 * 
-	 * @return the relevant loincId for this result or null if none exists.
+	 * @return the relevant loincId for this result
 	 */
 	public LoincId getLoincId() {
-		return observationLoincInfo.getLoincId();
+		return loincId;
 	}
 
 	/**
