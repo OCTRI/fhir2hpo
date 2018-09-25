@@ -3,8 +3,8 @@ package org.monarchinitiative.fhir2hpo.loinc;
 import java.util.Collection;
 
 import org.hl7.fhir.dstu3.model.Observation;
-import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
+import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
 
 /**
  * This interface defines the complete HPO annotation for a given LOINC Id. It provides a way to convert

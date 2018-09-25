@@ -6,9 +6,10 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Observation;
 
 /**
- * The ObservationConversionResult consists of the original observation and a collection of LoincConversionResults
- * corresponding to each LOINC found in the observation. LOINCs can be found in both the code section and components
- * section of the observation. The list is empty if no LOINCs are found.
+ * The ObservationConversionResult consists of the original observation, a collection of LoincConversionResults
+ * corresponding to each LOINC found in the observation, and a collection of inferred conversion results from analyzing
+ * the LOINC specific HPO terms. LOINCs can be found in both the code section and components
+ * section of the observation.
  * 
  * @author yateam
  *
@@ -17,12 +18,12 @@ public class ObservationConversionResult {
 	
 	private Observation observation;
 	private List<LoincConversionResult> loincConversionResults;
-	private List<AugmentedConversionResult> augmentedConversionResults;
+	private List<InferredConversionResult> inferredConversionResults;
 	
 	public ObservationConversionResult(Observation observation) {
 		this.observation = observation;
 		this.loincConversionResults = new ArrayList<>();
-		this.augmentedConversionResults = new ArrayList<>();
+		this.inferredConversionResults = new ArrayList<>();
 	}
 	
 	public Observation getObservation() {
@@ -33,16 +34,26 @@ public class ObservationConversionResult {
 		loincConversionResults.add(loincConversionResult);
 	}
 	
+	/**
+	 * Return the conversion results specific to LOINCs found in the observation. This list is empty
+	 * if no LOINCs are found.
+	 * @return
+	 */
 	public List<LoincConversionResult> getLoincConversionResults() {
 		return loincConversionResults;
 	}
 	
-	public void addAugmentedConversionResult(AugmentedConversionResult augmentedConversionResult) {
-		augmentedConversionResults.add(augmentedConversionResult);
+	public void addInferredConversionResult(InferredConversionResult inferredConversionResult) {
+		inferredConversionResults.add(inferredConversionResult);
 	}
 	
-	public List<AugmentedConversionResult> getAugmentedConversionResults() {
-		return augmentedConversionResults;
+	/**
+	 * Return the inferred conversion results from analyzing LOINC specific HPOs. This list is empty
+	 * if there were no HPO terms found or no inferences made.
+	 * @return
+	 */
+	public List<InferredConversionResult> getInferredConversionResults() {
+		return inferredConversionResults;
 	}
 	
 }

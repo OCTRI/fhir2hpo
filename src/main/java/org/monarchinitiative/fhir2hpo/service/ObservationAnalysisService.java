@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Observation;
 import org.monarchinitiative.fhir2hpo.fhir.util.ObservationUtil;
-import org.monarchinitiative.fhir2hpo.hpo.AugmentedConversionResult;
+import org.monarchinitiative.fhir2hpo.hpo.InferredConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.ObservationConversionResult;
@@ -24,7 +24,7 @@ public class ObservationAnalysisService {
 	AnnotationService annotationService;
 
 	@Autowired
-	HpoAugmentationService hpoAugmentationService;
+	HpoInferenceService hpoAugmentationService;
 	
 	int i = 1;
 	
@@ -74,10 +74,10 @@ public class ObservationAnalysisService {
 		}
 		
 		if (hpoTerms.size() > 1) {
-			List<HpoTermWithNegation> otherTerms = hpoAugmentationService.getAugmentedConversionResults(hpoTerms);
+			List<HpoTermWithNegation> otherTerms = hpoAugmentationService.getInferredConversionResults(hpoTerms);
 			if (!otherTerms.isEmpty()) {
 				System.out.println(otherTerms);
-				result.addAugmentedConversionResult(new AugmentedConversionResult(otherTerms.get(0)));
+				result.addInferredConversionResult(new InferredConversionResult(otherTerms.get(0)));
 			}
 		}
 		
