@@ -43,8 +43,8 @@ public class ObservationConversionResult {
 		return loincConversionResults;
 	}
 	
-	public void addInferredConversionResult(InferredConversionResult inferredConversionResult) {
-		inferredConversionResults.add(inferredConversionResult);
+	public void setInferredConversionResults(List<InferredConversionResult> inferredConversionResults) {
+		this.inferredConversionResults = inferredConversionResults;
 	}
 	
 	/**

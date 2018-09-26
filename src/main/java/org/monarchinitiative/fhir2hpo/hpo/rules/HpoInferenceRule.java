@@ -17,8 +17,9 @@ public interface HpoInferenceRule {
 
 	static final JexlEngine ENGINE = new JexlBuilder().cache(512).strict(true).silent(false).create();
 
-	JexlScript getRule();
-	JexlContext getContext();
+	public JexlScript getRule();
+	public JexlContext getContext();
+	public String getDescription();
 	
 	/**
 	 * Given the set of terms found in an observation, return an inferred term or null if no inference is made
@@ -30,5 +31,5 @@ public interface HpoInferenceRule {
 		Object o = getRule().execute(getContext());
 		return (o != null) ? (HpoTermWithNegation) o : null;
 	}
-
+	
 }

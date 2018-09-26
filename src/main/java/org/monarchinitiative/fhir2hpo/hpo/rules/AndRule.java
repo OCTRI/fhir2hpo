@@ -19,6 +19,10 @@ public class AndRule implements HpoInferenceRule {
 	
 	JexlContext jexlContext;
 	
+	private static final String INPUT_H1 = "H1";
+	private static final String INPUT_H2 = "H2";
+	private static final String OUTPUT_H3 = "H3";
+	
 	/**
 	 * Construct an AND rule where the existence of h1 and h2 should infer h3
 	 * @param h1
@@ -27,9 +31,9 @@ public class AndRule implements HpoInferenceRule {
 	 */
 	public AndRule(HpoTermWithNegation h1, HpoTermWithNegation h2, HpoTermWithNegation h3) {
 		jexlContext = new MapContext();
-		jexlContext.set("H1", h1);
-		jexlContext.set("H2", h2);
-		jexlContext.set("H3", h3);
+		jexlContext.set(INPUT_H1, h1);
+		jexlContext.set(INPUT_H2, h2);
+		jexlContext.set(OUTPUT_H3, h3);
 	}
 	
 	@Override
@@ -40,6 +44,13 @@ public class AndRule implements HpoInferenceRule {
 	@Override
 	public JexlContext getContext() {
 		return jexlContext;
+	}
+
+	@Override
+	public String getDescription() {
+		return (HpoTermWithNegation) jexlContext.get(INPUT_H1) + " AND " + 
+			(HpoTermWithNegation) jexlContext.get(INPUT_H2) + " INFERS " +
+			(HpoTermWithNegation) jexlContext.get(OUTPUT_H3);
 	}
 
 }

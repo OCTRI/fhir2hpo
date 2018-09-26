@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
+import org.monarchinitiative.fhir2hpo.hpo.InferredConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.rules.AndWithDescendantsRule;
 import org.monarchinitiative.fhir2hpo.hpo.rules.HpoInferenceRule;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -28,12 +29,18 @@ public class HpoInferenceService {
 		HpoTermWithNegation elevatedCreatinine = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0003259"), false);
 		HpoTermWithNegation hyperglycemia = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0003074"), false);
 		HpoTermWithNegation diabetes = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0000819"), false);
-		HpoInferenceRule rule = new AndWithDescendantsRule(hpoService.getChildren(elevatedCreatinine), hpoService.getChildren(hyperglycemia), diabetes);
+		HpoInferenceRule rule = new AndWithDescendantsRule(hpoService, elevatedCreatinine, hyperglycemia, diabetes);
 		rules.add(rule);		
 	}
 	
-	public List<HpoTermWithNegation> getInferredConversionResults(List<HpoTermWithNegation> terms) {
-		return rules.stream().map(rule -> rule.evaluate(terms)).filter(it -> it!= null).collect(Collectors.toList());
+	public List<InferredConversionResult> getInferredConversionResults(List<HpoTermWithNegation> terms) {
+		return rules.stream().map(rule -> {
+			HpoTermWithNegation term = rule.evaluate(terms);
+			if (term != null) {
+				return new InferredConversionResult(term, rule.getDescription());
+			}
+			return null;
+		}).filter(it -> it!= null).collect(Collectors.toList());
 	}
 
 }
