@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 import org.monarchinitiative.fhir2hpo.hpo.InferredConversionResult;
-import org.monarchinitiative.fhir2hpo.hpo.rules.AndWithDescendantsRule;
+import org.monarchinitiative.fhir2hpo.hpo.rules.AndRule;
 import org.monarchinitiative.fhir2hpo.hpo.rules.HpoInferenceRule;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +26,27 @@ public class HpoInferenceService {
 	
 	@Autowired
 	public HpoInferenceService(HpoService hpoService) {
-		HpoTermWithNegation elevatedCreatinine = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0003259"), false);
-		HpoTermWithNegation hyperglycemia = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0003074"), false);
-		HpoTermWithNegation diabetes = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0000819"), false);
-		HpoInferenceRule rule = new AndWithDescendantsRule(hpoService, elevatedCreatinine, hyperglycemia, diabetes);
+		
+		// Decreased Hemoglobin AND Decreased MCV => Mycrocytic Anemia
+		HpoTermWithNegation decreasedHemoglobin = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0020062"), false);
+		HpoTermWithNegation decreasedMCV = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0025066"), false);
+		HpoTermWithNegation microcyticAnemia = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0001935"), false);
+		HpoInferenceRule rule = new AndRule(decreasedHemoglobin, decreasedMCV, microcyticAnemia);
 		rules.add(rule);		
-	}
+	
+		// Decreased Hemoglobin AND Normal MCV => Normocytic Anemia
+		HpoTermWithNegation normalMCV = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0025065"), true);
+		HpoTermWithNegation normocyticAnemia = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0001897"), false);
+		rule = new AndRule(decreasedHemoglobin, normalMCV, normocyticAnemia);
+		rules.add(rule);
+		
+		// Decreased Hemoglobin AND Increased MCV => Macrocytic Anemia
+		HpoTermWithNegation increasedMCV = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0005518"), false);
+		HpoTermWithNegation macrocyticAnemia = new HpoTermWithNegation(TermId.constructWithPrefix("HP:0001972"), false);
+		rule = new AndRule(decreasedHemoglobin, increasedMCV, macrocyticAnemia);
+		rules.add(rule);
+		
+}
 	
 	public List<InferredConversionResult> getInferredConversionResults(List<HpoTermWithNegation> terms) {
 		return rules.stream().map(rule -> {

@@ -1,19 +1,15 @@
 package org.monarchinitiative.fhir2hpo.fhir.util;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationComponentComponent;
 import org.hl7.fhir.dstu3.model.Observation.ObservationReferenceRangeComponent;
-import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.exception.MismatchedLoincIdException;
 
@@ -29,8 +25,7 @@ public class ObservationLoincInfo {
 	private String fhirId;
 	private LoincId loincId;
 	private String description;
-	private Optional<Date> startDate = Optional.empty();
-	private Optional<Date> endDate = Optional.empty();
+	private ObservationPeriod observationPeriod;
 	private String valueDescription;
 	private Optional<CodeableConcept> interpretation = Optional.empty();
 	private Optional<Quantity> valueQuantity = Optional.empty();
@@ -39,9 +34,9 @@ public class ObservationLoincInfo {
 
 	public ObservationLoincInfo(LoincId loincId, Observation observation) throws MismatchedLoincIdException {
 		
-		this.fhirId = observation.getIdElement().getIdPart();
+		this.fhirId = ObservationUtil.getFhirId(observation);
 		this.loincId = loincId;
-		setDate(observation);
+		this.observationPeriod = ObservationUtil.getDates(observation);
 		boolean containsLoinc = false;
 		if (ObservationUtil.getCodeSectionLoincIdsOfObservation(observation).contains(loincId)) {
 			containsLoinc = true;
@@ -61,30 +56,6 @@ public class ObservationLoincInfo {
 		}
 	}
 
-	private void setDate(Observation observation) {
-		try {
-			if (observation.hasEffective()) {
-				Type effective = observation.getEffective();
-				if (effective instanceof DateTimeType) {
-					// Set start and end date to the same
-					startDate = Optional.of(observation.getEffectiveDateTimeType().getValue());
-					endDate = startDate;
-				} else if (effective instanceof Period) {
-					Period period = observation.getEffectivePeriod();
-					if (period.hasStart()) {
-						startDate = Optional.of(period.getStart());
-					}
-					if (period.hasEnd()) {
-						endDate = Optional.of(period.getEnd());
-					}
-				}
-			}
-		} catch (FHIRException e) {
-			// This should not occur since we check existence before getting
-			e.printStackTrace();
-		}
-	}
-	
 	/**
 	 * Call getters on either the Observation or the ObservationComponentComponent depending
 	 * on where the LOINC of interest lives. Set fields of interest.
@@ -158,19 +129,11 @@ public class ObservationLoincInfo {
 	}
 
 	/**
-	 * Get the start date
+	 * Get the observation period
 	 * @return
 	 */
-	public Optional<Date> getStartDate() {
-		return startDate;
-	}
-
-	/**
-	 * Get the end date
-	 * @return
-	 */
-	public Optional<Date> getEndDate() {
-		return endDate;
+	public ObservationPeriod getObservationPeriod() {
+		return observationPeriod;
 	}
 
 	/**

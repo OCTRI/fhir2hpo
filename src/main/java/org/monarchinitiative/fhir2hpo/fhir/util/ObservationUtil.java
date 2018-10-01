@@ -8,14 +8,22 @@ import java.util.Set;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.Observation.ObservationComponentComponent;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 
 public class ObservationUtil {
 
 	private static final String LOINC_SYSTEM = "http://loinc.org";
+	
+	public static String getFhirId(Observation observation) {
+		return observation.getIdElement().getIdPart();
+	}
 
 	public static Set<LoincId> getAllLoincIdsOfObservation(Observation observation) {
 		Set<LoincId> loincIds = new HashSet<>();
@@ -90,5 +98,39 @@ public class ObservationUtil {
 		return null;
 		
 	}
+	
+	/**
+	 * Parse the observation for date(s). Start and end dates are optional and a single effective date sets start and end
+	 * to the same
+	 * @param observation
+	 * @return
+	 */
+	public static ObservationPeriod getDates(Observation observation) {
+		ObservationPeriod observationPeriod = new ObservationPeriod();
+		try {
+			if (observation.hasEffective()) {
+				Type effective = observation.getEffective();
+				if (effective instanceof DateTimeType) {
+					// Set start and end date to the same
+					observationPeriod.setStartDate(Optional.of(observation.getEffectiveDateTimeType().getValue()));
+					observationPeriod.setEndDate(observationPeriod.getStartDate());
+				} else if (effective instanceof Period) {
+					Period period = observation.getEffectivePeriod();
+					if (period.hasStart()) {
+						observationPeriod.setStartDate(Optional.of(period.getStart()));
+					}
+					if (period.hasEnd()) {
+						observationPeriod.setEndDate(Optional.of(period.getEnd()));
+					}
+				}
+			}
+		} catch (FHIRException e) {
+			// This should not occur since we check existence before getting
+			e.printStackTrace();
+		}
+		return observationPeriod;
+	}
+	
+
 
 }

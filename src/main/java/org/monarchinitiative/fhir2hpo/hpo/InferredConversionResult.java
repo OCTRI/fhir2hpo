@@ -9,16 +9,21 @@ package org.monarchinitiative.fhir2hpo.hpo;
  *
  */
 public class InferredConversionResult {
-	
+
 	HpoTermWithNegation hpoTerm;
 	String description;
-	
+
 	public InferredConversionResult(HpoTermWithNegation hpoTerm, String description) {
 		this.hpoTerm = hpoTerm;
+		this.description = description;
 	}
-	
+
 	public HpoTermWithNegation getHpoTerm() {
 		return hpoTerm;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 }

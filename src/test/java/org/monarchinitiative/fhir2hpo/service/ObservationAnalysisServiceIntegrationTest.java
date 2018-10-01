@@ -23,7 +23,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {ObservationAnalysisService.class, AnnotationService.class}, loader = AnnotationConfigContextLoader.class)
+@ContextConfiguration(classes = {ObservationAnalysisService.class, AnnotationService.class, HpoInferenceService.class, HpoService.class}, loader = AnnotationConfigContextLoader.class)
 public class ObservationAnalysisServiceIntegrationTest {
 
     @Autowired

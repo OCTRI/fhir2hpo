@@ -51,8 +51,8 @@ public class ObservationLoincInfoTest {
 		Observation observation = FhirParseUtils.getObservation("fhir/observation/basMetab1998Panel.json");
 		ObservationLoincInfo info = new ObservationLoincInfo(panelLoinc, observation);
 		assertEquals("The fhirId is extracted correctly.", "bas-metab-1998", info.getFhirId());
-		assertEquals("The start date is extracted correctly", effectiveDateTime, info.getStartDate().get());
-		assertEquals("The end date is extracted correctly", effectiveDateTime, info.getEndDate().get());
+		assertEquals("The start date is extracted correctly", effectiveDateTime, info.getObservationPeriod().getStartDate().get());
+		assertEquals("The end date is extracted correctly", effectiveDateTime, info.getObservationPeriod().getEndDate().get());
 		assertEquals("The code text is used for the description", "Bas Metab Panel with Annotated Components", info.getDescription());
 		assertNull("There is no value description for the code.", info.getValueDescription());
 		assertFalse("There is no interpretation for the code", info.getInterpretation().isPresent());
@@ -66,8 +66,8 @@ public class ObservationLoincInfoTest {
 		Observation observation = FhirParseUtils.getObservation("fhir/observation/basMetab1998Panel.json");
 		ObservationLoincInfo info = new ObservationLoincInfo(creatLoinc, observation);
 		assertEquals("The fhirId is extracted correctly.", "bas-metab-1998", info.getFhirId());
-		assertEquals("The start date is extracted correctly", effectiveDateTime, info.getStartDate().get());
-		assertEquals("The end date is extracted correctly", effectiveDateTime, info.getEndDate().get());
+		assertEquals("The start date is extracted correctly", effectiveDateTime, info.getObservationPeriod().getStartDate().get());
+		assertEquals("The end date is extracted correctly", effectiveDateTime, info.getObservationPeriod().getEndDate().get());
 		assertEquals("The component code display is used for the description", "Creat SerPl-mCnc", info.getDescription());
 		assertEquals("The value description for the component includes the quantity and unit", "1.0 mg/dL", info.getValueDescription());
 		assertFalse("There is no interpretation for the component", info.getInterpretation().isPresent());
@@ -81,8 +81,8 @@ public class ObservationLoincInfoTest {
 		Observation observation = FhirParseUtils.getObservation("fhir/observation/basMetab1998Panel.json");
 		ObservationLoincInfo info = new ObservationLoincInfo(glucoseLoinc, observation);
 		assertEquals("The fhirId is extracted correctly.", "bas-metab-1998", info.getFhirId());
-		assertEquals("The start date is extracted correctly", effectiveDateTime, info.getStartDate().get());
-		assertEquals("The end date is extracted correctly", effectiveDateTime, info.getEndDate().get());
+		assertEquals("The start date is extracted correctly", effectiveDateTime, info.getObservationPeriod().getStartDate().get());
+		assertEquals("The end date is extracted correctly", effectiveDateTime, info.getObservationPeriod().getEndDate().get());
 		assertEquals("The component code display is used for the description", "Glucose SerPl-mCnc", info.getDescription());
 		assertEquals("The value description for the component includes the quantity and unit", "6.3 mmol/l", info.getValueDescription());
 		assertTrue("There is an interpretation for the component", info.getInterpretation().isPresent());
@@ -101,8 +101,8 @@ public class ObservationLoincInfoTest {
 		observation.setEffective(period);
 		
 		ObservationLoincInfo info = new ObservationLoincInfo(panelLoinc, observation);
-		assertEquals("The start date is extracted correctly", periodStart, info.getStartDate().get());
-		assertEquals("The end date is extracted correctly", periodEnd, info.getEndDate().get());
+		assertEquals("The start date is extracted correctly", periodStart, info.getObservationPeriod().getStartDate().get());
+		assertEquals("The end date is extracted correctly", periodEnd, info.getObservationPeriod().getEndDate().get());
 		
 		// Test period without a start date
 		period = new Period();
@@ -110,8 +110,8 @@ public class ObservationLoincInfoTest {
 		observation.setEffective(period);
 		
 		info = new ObservationLoincInfo(panelLoinc, observation);
-		assertFalse("The start date is not present", info.getStartDate().isPresent());
-		assertEquals("The end date is extracted correctly", periodEnd, info.getEndDate().get());
+		assertFalse("The start date is not present", info.getObservationPeriod().getStartDate().isPresent());
+		assertEquals("The end date is extracted correctly", periodEnd, info.getObservationPeriod().getEndDate().get());
 		
 	}
 	
@@ -122,8 +122,8 @@ public class ObservationLoincInfoTest {
 		observation.setEffective(null);
 		
 		ObservationLoincInfo info = new ObservationLoincInfo(panelLoinc, observation);
-		assertFalse("The start date is not present", info.getStartDate().isPresent());
-		assertFalse("The end date is not present", info.getEndDate().isPresent());
+		assertFalse("The start date is not present", info.getObservationPeriod().getStartDate().isPresent());
+		assertFalse("The end date is not present", info.getObservationPeriod().getEndDate().isPresent());
 		
 	}
 
