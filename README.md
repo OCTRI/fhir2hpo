@@ -2,9 +2,22 @@
 
 This library converts FHIR STU3 Observations to Human Phenotype Ontology (HPO) Terms when LOINCs and interpretable values are present.
 
-Using the jar requires local installation of the [monarch-initiative phenol library](https://github.com/monarch-initiative/phenol) that defines the domain around the HPO. 
+# Setup
 
-Once phenol is installed, compile the library and run the tests using `mvn clean install`.
+Compiling this library requires installation of [Maven](http://maven.apache.org/install.html) and [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
+
+In addition, you need to locally install the [monarch-initiative phenol library](https://github.com/monarch-initiative/phenol) that defines the domain around the HPO. This project is not yet available on Maven Central. From the command line:
+
+```
+git clone https://github.com/monarch-initiative/phenol.git
+cd phenol
+git checkout v.1.2.6
+mvn install
+``` 
+
+This checks out and builds Release 1.2.6 of phenol. 
+
+Now install this library. You can either build from master or check out a release tag. Run `mvn clean install` to build and deposit the new dependency into your maven repository.
 
 ## Using the library
 
@@ -14,7 +27,7 @@ fhir2hpo can be included in your maven project as a dependency:
 <dependency>
 	<groupId>org.monarchinitiative</groupId>
 	<artifactId>fhir2hpo</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 </dependency>
 ```
 
