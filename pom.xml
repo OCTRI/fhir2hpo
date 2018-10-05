@@ -4,7 +4,7 @@
 
 	<groupId>org.monarchinitiative</groupId>
 	<artifactId>fhir2hpo</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>fhir2hpo</name>
