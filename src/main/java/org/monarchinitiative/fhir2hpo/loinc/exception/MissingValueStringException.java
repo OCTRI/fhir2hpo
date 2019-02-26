@@ -6,7 +6,7 @@ public class MissingValueStringException extends ConversionException {
 	private static final long serialVersionUID = 1L;
 
 	public MissingValueStringException() {
-		super("The observation does not have a value quantity.");
+		super("The observation does not have a value string.");
 	}
 	
 }
