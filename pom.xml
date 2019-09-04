@@ -4,7 +4,7 @@
 
 	<groupId>org.monarchinitiative</groupId>
 	<artifactId>fhir2hpo</artifactId>
-	<version>1.0.4-SNAPSHOT-SNAPSHOT</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>fhir2hpo</name>
@@ -81,7 +81,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>3.4.0</version>
+			<version>3.8.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-io</groupId>
