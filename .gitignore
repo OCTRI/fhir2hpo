@@ -24,3 +24,5 @@ hp.tmp
 /dist/
 /nbdist/
 /.nb-gradle/
+
+**/.DS_Store
