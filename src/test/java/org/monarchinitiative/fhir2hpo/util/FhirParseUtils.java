@@ -3,13 +3,13 @@ package org.monarchinitiative.fhir2hpo.util;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.r5.model.Observation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 /**
- * Utility for processing FHIR STU3 resources.
+ * Utility for processing FHIR R5 resources.
  * 
  * @author yateam
  *
@@ -17,9 +17,9 @@ import ca.uhn.fhir.parser.IParser;
 public class FhirParseUtils {
 	
 	// This is expensive and should only be declared once
-	private static final FhirContext fhirContext = FhirContext.forDstu3();
+	private static final FhirContext fhirContext = FhirContext.forR5();
 	
-	public FhirContext getStu3FhirContext() {
+	public FhirContext getR5FhirContext() {
 		return fhirContext;
 	}
 

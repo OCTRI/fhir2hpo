@@ -10,8 +10,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Period;
 import org.junit.Before;
 import org.junit.Test;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;

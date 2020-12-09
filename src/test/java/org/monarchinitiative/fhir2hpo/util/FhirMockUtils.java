@@ -5,8 +5,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
 
 public class FhirMockUtils {
 	

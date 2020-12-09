@@ -3,7 +3,7 @@ package org.monarchinitiative.fhir2hpo.hpo;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.r5.model.Observation;
 
 /**
  * The ObservationConversionResult consists of the original observation and a collection of LoincConversionResults

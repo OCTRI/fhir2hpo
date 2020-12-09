@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
 import org.junit.Test;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConflictingInternalCodesException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException;

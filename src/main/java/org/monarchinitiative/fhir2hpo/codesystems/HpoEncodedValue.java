@@ -1,6 +1,6 @@
 package org.monarchinitiative.fhir2hpo.codesystems;
 
-import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.r5.model.Coding;
 
 /**
  * This class is very similar to org.hl7.fhir.dstu3.model.Coding. We override the equals() method so that any two 
