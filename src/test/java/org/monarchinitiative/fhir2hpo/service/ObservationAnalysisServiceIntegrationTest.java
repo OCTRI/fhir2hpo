@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.r5.model.Observation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
