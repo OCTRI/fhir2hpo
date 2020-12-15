@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Observation.ObservationReferenceRangeComponent;
-import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Observation.ObservationReferenceRangeComponent;
+import org.hl7.fhir.r5.model.Quantity;
 import org.monarchinitiative.fhir2hpo.codesystems.CodeContainer;
 import org.monarchinitiative.fhir2hpo.codesystems.CodeableConceptAnalyzer;
 import org.monarchinitiative.fhir2hpo.codesystems.HpoEncodedValue;

@@ -1,6 +1,6 @@
 # FHIR to HPO
 
-This library converts FHIR STU3 Observations to Human Phenotype Ontology (HPO) Terms when LOINCs and interpretable values are present.
+This library converts FHIR R5 Observations to Human Phenotype Ontology (HPO) Terms when LOINCs and interpretable values are present.
 
 # Setup
 
@@ -50,7 +50,7 @@ public class MyApp {
 }
 ```
 
-Then pass STU3 observations to the service to convert:
+Then pass observations to the service to convert:
 
 ```
 Observation observation = getObservationFromFhirServer(...);
@@ -147,8 +147,6 @@ It is possible, though rare, that the HpoTerm for one method will not match the 
 
 There are two open-source projects using the library that can serve as examples.
 
-This proof-of-concept [web application](https://github.com/OCTRI/poc-hpo-on-fhir) searches for users in the SMART Health IT STU3 sandbox and converts their observations to HPO Terms.
+This proof-of-concept [web application](https://github.com/OCTRI/poc-hpo-on-fhir) searches for users in a FHIR sandbox and converts their observations to HPO Terms. This application is capable of communicating with earlier versions of FHIR servers and provides examples of converting the responses to R5 so they can be used by the library.
 
-This [statistics gatherer](https://github.com/OCTRI/f2hstats) collects observations from several sandboxes and stores the conversion results in a database where it is easy to qualify the types of observations encountered and the successes/failures of the library. Currently it can only communicate with a small set of unauthenticated sandboxes, but it can be easily adapted to capture real EHR data and even to obscure any PHI so that only aggregate information is recorded.
-
-Both applications are capable of communicating with STU2 servers and provide an example of converting the responses to STU3 so they can be used by the library.
+This [statistics gatherer](https://github.com/OCTRI/f2hstats) collects observations from several sandboxes and stores the conversion results in a database where it is easy to qualify the types of observations encountered and the successes/failures of the library. Currently it can only communicate with a small set of unauthenticated sandboxes, but it can be easily adapted to capture real EHR data and even to obscure any PHI so that only aggregate information is recorded. This should work with release 1.0.0 of this library which expected STU3 observations.

@@ -70,7 +70,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>3.8.0</version>
+			<version>5.2.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -80,8 +80,8 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>3.8.0</version>
+			<artifactId>hapi-fhir-structures-r5</artifactId>
+			<version>5.2.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-io</groupId>

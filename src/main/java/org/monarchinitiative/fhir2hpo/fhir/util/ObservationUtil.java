@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Observation.ObservationComponentComponent;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Observation.ObservationComponentComponent;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 

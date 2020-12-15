@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConflictingInternalCodesException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.ConversionException;
 import org.monarchinitiative.fhir2hpo.loinc.exception.UnmappedCodeableConceptException;

@@ -2,7 +2,7 @@ package org.monarchinitiative.fhir2hpo.loinc;
 
 import java.util.Collection;
 
-import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.r5.model.Observation;
 import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 

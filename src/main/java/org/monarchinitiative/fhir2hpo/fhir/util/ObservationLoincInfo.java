@@ -6,15 +6,15 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Observation.ObservationComponentComponent;
-import org.hl7.fhir.dstu3.model.Observation.ObservationReferenceRangeComponent;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Type;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.DataType;
+import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Observation.ObservationComponentComponent;
+import org.hl7.fhir.r5.model.Observation.ObservationReferenceRangeComponent;
+import org.hl7.fhir.r5.model.Period;
+import org.hl7.fhir.r5.model.Quantity;
+import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.exception.MismatchedLoincIdException;
@@ -66,7 +66,7 @@ public class ObservationLoincInfo {
 	private void setDate(Observation observation) {
 		try {
 			if (observation.hasEffective()) {
-				Type effective = observation.getEffective();
+				DataType effective = observation.getEffective();
 				if (effective instanceof DateTimeType) {
 					// Set start and end date to the same
 					startDate = Optional.of(observation.getEffectiveDateTimeType().getValue());
@@ -105,11 +105,13 @@ public class ObservationLoincInfo {
 			
 			// Call hasInterpretation(). If true, set the Optional interpretation field
 			if ((boolean) clazz.getDeclaredMethod("hasInterpretation").invoke(o)) {
-				interpretation = Optional.of((CodeableConcept) clazz.getDeclaredMethod("getInterpretation").invoke(o));
+				// TODO: AEY R4 changes the return value to a list. For now just get the first.
+				List<CodeableConcept> interpretations = (List<CodeableConcept>) clazz.getDeclaredMethod("getInterpretation").invoke(o);
+				interpretation = Optional.of(interpretations.get(0));
 			}
 			
 			// Call getValue(). If value exists, set the Optional ValueQuantity and ValueString fields. Other Types are ignored.
-			Type value = (Type) clazz.getDeclaredMethod("getValue").invoke(o);
+			DataType value = (DataType) clazz.getDeclaredMethod("getValue").invoke(o);
 			if (value != null) {
 				if (value instanceof Quantity) {
 					Quantity quantity = (Quantity) clazz.getDeclaredMethod("getValueQuantity").invoke(o);

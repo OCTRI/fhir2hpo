@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
-import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.r5.model.Observation;
 import org.monarchinitiative.fhir2hpo.hpo.HpoTermWithNegation;
 import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
 import org.monarchinitiative.fhir2hpo.loinc.exception.NonInterpretableLoincException;

@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.r5.model.Coding;
+
 
 //TODO: Consider allowing jar user to add their own mappings as original library did
 public class CodeContainer {
