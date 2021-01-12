@@ -151,6 +151,6 @@ It is possible, though rare, that the HpoTerm for one method will not match the 
 
 There are two open-source projects using the library that can serve as examples.
 
-This proof-of-concept [web application](https://github.com/OCTRI/poc-hpo-on-fhir/tree/vulcan-phenopackets) searches for users in a FHIR sandbox and converts their observations to HPO Terms. This application is capable of communicating with earlier versions of FHIR servers and provides examples of converting the responses to R5 so they can be used by the library. Note that the branch vulcan-phenopackets has the most recent code.
+This proof-of-concept [web application](https://github.com/OCTRI/poc-hpo-on-fhir) searches for users in a FHIR sandbox and converts their observations to HPO Terms. This application is capable of communicating with earlier versions of FHIR servers and provides examples of converting the responses to R5 so they can be used by the library.
 
 This [statistics gatherer](https://github.com/OCTRI/f2hstats) collects observations from several sandboxes and stores the conversion results in a database where it is easy to qualify the types of observations encountered and the successes/failures of the library. Currently it can only communicate with a small set of unauthenticated sandboxes, but it can be easily adapted to capture real EHR data and even to obscure any PHI so that only aggregate information is recorded. This should work with release 1.0.3 of this library which expected STU3 observations.
