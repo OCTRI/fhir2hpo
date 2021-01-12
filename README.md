@@ -1,6 +1,6 @@
 # FHIR to HPO
 
-This library converts FHIR R5 Observations to Human Phenotype Ontology (HPO) Terms when LOINCs and interpretable values are present.
+This library converts FHIR Observations to Human Phenotype Ontology (HPO) Terms when LOINCs and interpretable values are present. It accepts R5 FHIR Resources formatted using the [HAPI-FHIR Java library](https://hapifhir.io/). HAPI-FHIR also provides a number of [converters](https://hapifhir.io/hapi-fhir/docs/model/converter.html) that can be used to communicate with previous FHIR versions, so you are not limited to using this library on an R5 server.
 
 # Setup
 
@@ -17,7 +17,7 @@ mvn install
 
 This checks out and builds Release 1.2.6 of phenol. 
 
-Now install this library. You can either build from master or check out a release tag. Run `mvn clean install` to build and deposit the new dependency into your maven repository.
+Once phenol is installed, install the fhir2hpo library. You can either clone this repo and build from master or check out a release tag. Run `mvn clean install` to build and deposit the new dependency into your maven repository.
 
 ## Using the library
 
@@ -27,11 +27,11 @@ fhir2hpo can be included in your maven project as a dependency:
 <dependency>
 	<groupId>org.monarchinitiative</groupId>
 	<artifactId>fhir2hpo</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.5</version>
 </dependency>
 ```
 
-Use the ObservationAnalysisService provided by this library to perform conversion. In a Spring Boot application, you can autowire this service and access the associated domain by scanning the fhir2hpo packages.
+To perform conversion of a FHIR Observation to HPO Terms, use the ObservationAnalysisService provided by this library. In a Spring Boot application, you can autowire this service and access the associated domain by scanning the fhir2hpo packages.
 
 ```
 package org.myapp.pkg;
@@ -56,6 +56,10 @@ Then pass observations to the service to convert:
 Observation observation = getObservationFromFhirServer(...);
 ObservationConversionResult observationConversionResult = observationAnalysisService.convert(observation);
 ```
+
+Two other services are provided that may be useful. The HpoService provides additional information about an HPO Term given a TermId. This is where you would find the term name (e.g., HP:0003573 => Increased total bilirubin).
+
+The AnnotationService provides information about how LOINC Codes are mapped to HPO Terms.
 
 ## Understanding the ObservationConversionResult
 
@@ -138,7 +142,7 @@ Converting this observation would return four LoincConversionResults, 2 from the
 The conversion as a whole may fail if LOINCs are not annotated by the library. Assuming conversion is possible, three different methods are attempted. These will proceed regardless of the success or failure of previous methods.
 
 1. Interpretation: Look for an interpretation code for the LOINC that can be mapped to an HPO Term.
-2. Value Quantity and Reference Range: Determine whether the value is low, high, or within range and map to an Hpo Term
+2. Value Quantity and Reference Range: Look for a reference range provided by the observation, and determine whether the value is low, high, or within range and map to an Hpo Term
 3. Value String: Look for a Value String that can be interpreted seeking common terms like "positive", "negative", etc.
 
 It is possible, though rare, that the HpoTerm for one method will not match the term for another. In this case, all terms are returned in the result, and the consumer can decide how to handle.
@@ -147,6 +151,6 @@ It is possible, though rare, that the HpoTerm for one method will not match the 
 
 There are two open-source projects using the library that can serve as examples.
 
-This proof-of-concept [web application](https://github.com/OCTRI/poc-hpo-on-fhir) searches for users in a FHIR sandbox and converts their observations to HPO Terms. This application is capable of communicating with earlier versions of FHIR servers and provides examples of converting the responses to R5 so they can be used by the library.
+This proof-of-concept [web application](https://github.com/OCTRI/poc-hpo-on-fhir/tree/vulcan-phenopackets) searches for users in a FHIR sandbox and converts their observations to HPO Terms. This application is capable of communicating with earlier versions of FHIR servers and provides examples of converting the responses to R5 so they can be used by the library. Note that the branch vulcan-phenopackets has the most recent code.
 
-This [statistics gatherer](https://github.com/OCTRI/f2hstats) collects observations from several sandboxes and stores the conversion results in a database where it is easy to qualify the types of observations encountered and the successes/failures of the library. Currently it can only communicate with a small set of unauthenticated sandboxes, but it can be easily adapted to capture real EHR data and even to obscure any PHI so that only aggregate information is recorded. This should work with release 1.0.0 of this library which expected STU3 observations.
+This [statistics gatherer](https://github.com/OCTRI/f2hstats) collects observations from several sandboxes and stores the conversion results in a database where it is easy to qualify the types of observations encountered and the successes/failures of the library. Currently it can only communicate with a small set of unauthenticated sandboxes, but it can be easily adapted to capture real EHR data and even to obscure any PHI so that only aggregate information is recorded. This should work with release 1.0.3 of this library which expected STU3 observations.
